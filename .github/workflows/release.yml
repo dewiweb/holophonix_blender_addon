@@ -35,15 +35,18 @@ jobs:
       id: version_check
       run: |
         # Remove 'v' prefix from previous version for comparison
-        NORMALIZED_PREVIOUS=${steps.previous_version.outputs.previous_version#v}
+        NORMALIZED_PREVIOUS=${PREVIOUS_VERSION#v}
         
-        if [ "${{ steps.version.outputs.version }}" != "$NORMALIZED_PREVIOUS" ] || [ "${{ steps.previous_version.outputs.previous_version }}" == "v0.0.0" ]; then
+        if [ "$VERSION" != "$NORMALIZED_PREVIOUS" ] || [ "$PREVIOUS_VERSION" == "v0.0.0" ]; then
           echo "Version has changed or no previous tag exists, proceeding with release"
           echo "release=true" >> $GITHUB_OUTPUT
         else
           echo "Version has not changed, skipping release"
           echo "release=false" >> $GITHUB_OUTPUT
         fi
+      env:
+        VERSION: ${{ steps.version.outputs.version }}
+        PREVIOUS_VERSION: ${{ steps.previous_version.outputs.previous_version }}
 
     - name: Create Git Tag
       if: steps.version_check.outputs.release == 'true'
