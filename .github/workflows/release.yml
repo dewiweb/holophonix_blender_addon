@@ -19,7 +19,8 @@ jobs:
     - name: Extract version from __init__.py
       id: version
       run: |
-        VERSION=$(grep -oP '(?<=version = \()[^)]+' __init__.py | tr -d " ,")
+        VERSION=$(grep -oP '(?<="version" : \()[^)]+' __init__.py | tr -d " ,")
+        VERSION=${VERSION//,/\.}  # Replace commas with dots
         echo "Extracted version: $VERSION"
         echo "version=$VERSION" >> $GITHUB_OUTPUT
 
