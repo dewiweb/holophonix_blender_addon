@@ -110,8 +110,8 @@ The Holophonix Utils addon integrates the Holophonix Processor’s capabilities 
 ## Dependencies
 
 - Blender 4.3 or higher
-- [Animation Nodes](https://github.com/3dninja/AnimationNodes) (required for AN tree functionality)
-- [NodeOSC](https://github.com/BlenderCN-Community/NodeOSC) (required for OSC operations)
+- [Animation Nodes](https://github.com/JacquesLucke/animation_nodes): A node-based visual scripting system for Blender, enabling complex animations and procedural workflows. Required for AN tree functionality in the Holophonix Utils addon.
+- [NodeOSC](https://github.com/maybites/NodeOSC): A Blender addon for Open Sound Control (OSC) communication, enabling real-time interaction between Blender and external devices. Required for OSC operations in the Holophonix Utils addon.
 
 ## Assets
 
