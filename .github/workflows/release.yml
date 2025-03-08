@@ -70,4 +70,82 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: holophonix_utils.zip
         asset_name: holophonix_utils.zip
-        asset_content_type: application/zip
+        asset_content_type: application/zipname: Release Workflow
+        
+        on:
+          push:
+            branches:
+              - master
+        
+        permissions:
+          contents: write  # Grant write permissions for the contents scope
+        
+        jobs:
+          build:
+            runs-on: ubuntu-latest
+        
+            steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+        
+            - name: Extract version from __init__.py
+              id: version
+              run: |
+                VERSION=$(grep -oP '(?<="version" : \()[^)]+' __init__.py | tr -d " ")
+                VERSION=${VERSION//,/.}  # Replace commas with dots
+                echo "Extracted version: $VERSION"
+                echo "version=$VERSION" >> $GITHUB_OUTPUT
+        
+            - name: Get previous version from latest tag
+              id: previous_version
+              run: |
+                PREVIOUS_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+                echo "Previous version: $PREVIOUS_VERSION"
+                echo "previous_version=$PREVIOUS_VERSION" >> $GITHUB_OUTPUT
+        
+            - name: Check if version has changed or no previous tag exists
+              id: version_check
+              run: |
+                if [ "${{ steps.version.outputs.version }}" != "${{ steps.previous_version.outputs.previous_version }}" ] || [ "${{ steps.previous_version.outputs.previous_version }}" == "v0.0.0" ]; then
+                  echo "Version has changed or no previous tag exists, proceeding with release"
+                  echo "release=true" >> $GITHUB_OUTPUT
+                else
+                  echo "Version has not changed, skipping release"
+                  echo "release=false" >> $GITHUB_OUTPUT
+                fi
+        
+            - name: Create Git Tag
+              if: steps.version_check.outputs.release == 'true'
+              run: |
+                git config --global user.name "GitHub Actions"
+                git config --global user.email "actions@github.com"
+                git tag v${{ steps.version.outputs.version }}
+                git push origin v${{ steps.version.outputs.version }}
+        
+            - name: Zip the repository
+              if: steps.version_check.outputs.release == 'true'
+              run: |
+                zip -r holophonix_utils.zip .
+        
+            - name: Create Release
+              if: steps.version_check.outputs.release == 'true'
+              id: create_release
+              uses: actions/create-release@v1
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                tag_name: v${{ steps.version.outputs.version }}
+                release_name: Release v${{ steps.version.outputs.version }}
+                draft: false
+                prerelease: false
+        
+            - name: Upload Release Asset
+              if: steps.version_check.outputs.release == 'true'
+              uses: actions/upload-release-asset@v1
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                upload_url: ${{ steps.create_release.outputs.upload_url }}
+                asset_path: holophonix_utils.zip
+                asset_name: holophonix_utils.zip
+                asset_content_type: application/zip
