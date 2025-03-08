@@ -19,7 +19,7 @@ jobs:
     - name: Extract version from __init__.py
       id: version
       run: |
-        VERSION=$(grep -oP '(?<="version" : \()[^)]+' __init__.py | tr -d " ")
+        VERSION=$(grep -oP '(?<="version" : \()[^)]+' holophonix_utils/__init__.py | tr -d " ")
         VERSION=${VERSION//,/.}  # Replace commas with dots
         echo "Extracted version: $VERSION"
         echo "version=$VERSION" >> $GITHUB_OUTPUT
@@ -50,10 +50,10 @@ jobs:
         git tag v${{ steps.version.outputs.version }}
         git push origin v${{ steps.version.outputs.version }}
 
-    - name: Zip the repository
+    - name: Zip the addon folder
       if: steps.version_check.outputs.release == 'true'
       run: |
-        zip -r holophonix_utils.zip .
+        zip -r holophonix_utils.zip holophonix_utils
 
     - name: Create Release
       if: steps.version_check.outputs.release == 'true'
