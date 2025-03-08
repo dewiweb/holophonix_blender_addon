@@ -3,7 +3,7 @@ name: Release Workflow
 on:
   push:
     branches:
-      - master  # Trigger the workflow when changes are pushed to the master branch
+      - master
 
 permissions:
   contents: write  # Grant write permissions for the contents scope
@@ -16,7 +16,19 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: Check if version has changed
+      id: version_check
+      run: |
+        if git diff HEAD^ HEAD -- __init__.py | grep -q 'version'; then
+          echo "Version has changed, proceeding with release"
+          echo "release=true" >> $GITHUB_OUTPUT
+        else
+          echo "Version has not changed, skipping release"
+          echo "release=false" >> $GITHUB_OUTPUT
+        fi
+
     - name: Extract version from __init__.py
+      if: steps.version_check.outputs.release == 'true'
       id: version
       run: |
         VERSION=$(grep -oP '(?<="version" : \()[^)]+' __init__.py | tr -d " ")
@@ -25,6 +37,7 @@ jobs:
         echo "version=$VERSION" >> $GITHUB_OUTPUT
 
     - name: Create Git Tag
+      if: steps.version_check.outputs.release == 'true'
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
@@ -32,10 +45,12 @@ jobs:
         git push origin v${{ steps.version.outputs.version }}
 
     - name: Zip the addon
+      if: steps.version_check.outputs.release == 'true'
       run: |
         zip -r holophonix_utils.zip . -i holophonix_utils/*
 
     - name: Create Release
+      if: steps.version_check.outputs.release == 'true'
       id: create_release
       uses: actions/create-release@v1
       env:
@@ -47,6 +62,7 @@ jobs:
         prerelease: false
 
     - name: Upload Release Asset
+      if: steps.version_check.outputs.release == 'true'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
