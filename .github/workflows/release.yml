@@ -1,0 +1,54 @@
+name: Release Workflow
+
+on:
+  push:
+    branches:
+      - main  # Trigger the workflow when changes are pushed to the main branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Extract version from __init__.py
+      id: version
+      run: |
+        VERSION=$(grep -oP '(?<=version = \()[^)]+' holophonix_utils/__init__.py | tr -d " '")
+        echo "Extracted version: $VERSION"
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+    - name: Create Git Tag
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git tag v${{ steps.version.outputs.version }}
+        git push origin v${{ steps.version.outputs.version }}
+
+    - name: Zip the addon
+      run: |
+        cd holophonix_utils
+        zip -r ../holophonix_utils.zip .
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ steps.version.outputs.version }}
+        release_name: Release v${{ steps.version.outputs.version }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: holophonix_utils.zip
+        asset_name: holophonix_utils.zip
+        asset_content_type: application/zip
