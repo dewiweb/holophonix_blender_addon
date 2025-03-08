@@ -16,7 +16,7 @@ bl_info = {
     "author" : "Dewiweb",
     "description" : "",
     "blender" : (4, 3, 0),
-    "version" : (1, 0, 8),
+    "version" : (1, 0, 1),  # Updated version to trigger the release workflow
     "location" : "",
     "warning" : "",
     "doc_url": "",
