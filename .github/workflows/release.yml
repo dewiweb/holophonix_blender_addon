@@ -44,10 +44,10 @@ jobs:
         git tag v${{ steps.version.outputs.version }}
         git push origin v${{ steps.version.outputs.version }}
 
-    - name: Zip the addon
+    - name: Zip the repository
       if: steps.version_check.outputs.release == 'true'
       run: |
-        zip -r holophonix_utils.zip . -i holophonix_utils/*
+        zip -r holophonix_utils.zip .
 
     - name: Create Release
       if: steps.version_check.outputs.release == 'true'
