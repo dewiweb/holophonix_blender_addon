@@ -32,8 +32,7 @@ jobs:
 
     - name: Zip the addon
       run: |
-        cd holophonix_utils
-        zip -r ../holophonix_utils.zip .
+        zip -r holophonix_utils.zip holophonix_utils
 
     - name: Create Release
       id: create_release
