@@ -1,0 +1,18 @@
+# Ignore Blender temporary files
+*.blend1
+*.blend2
+
+# Ignore Python compiled files
+__pycache__/
+*.py[cod]
+
+# Ignore IDE specific files
+.vscode/
+.idea/
+
+# Ignore local settings
+*.local
+
+# Ignore system files
+.DS_Store
+Thumbs.db
