@@ -19,7 +19,7 @@ jobs:
     - name: Extract version from __init__.py
       id: version
       run: |
-        VERSION=$(grep -oP '(?<=version = \()[^)]+' holophonix_utils/__init__.py | tr -d " ,")
+        VERSION=$(grep -oP '(?<=version = \()[^)]+' holophonix_blender_addon/holophonix_utils/__init__.py | tr -d " ,")
         echo "Extracted version: $VERSION"
         echo "version=$VERSION" >> $GITHUB_OUTPUT
 
@@ -32,7 +32,7 @@ jobs:
 
     - name: Zip the addon
       run: |
-        zip -r holophonix_utils.zip . -i holophonix_utils/*
+        zip -r holophonix_utils.zip . -i holophonix_blender_addon/holophonix_utils/*
 
     - name: Create Release
       id: create_release
