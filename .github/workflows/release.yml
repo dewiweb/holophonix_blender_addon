@@ -34,7 +34,10 @@ jobs:
     - name: Check if version has changed or no previous tag exists
       id: version_check
       run: |
-        if [ "${{ steps.version.outputs.version }}" != "${{ steps.previous_version.outputs.previous_version }}" ] || [ "${{ steps.previous_version.outputs.previous_version }}" == "v0.0.0" ]; then
+        # Remove 'v' prefix from previous version for comparison
+        NORMALIZED_PREVIOUS=${steps.previous_version.outputs.previous_version#v}
+        
+        if [ "${{ steps.version.outputs.version }}" != "$NORMALIZED_PREVIOUS" ] || [ "${{ steps.previous_version.outputs.previous_version }}" == "v0.0.0" ]; then
           echo "Version has changed or no previous tag exists, proceeding with release"
           echo "release=true" >> $GITHUB_OUTPUT
         else
