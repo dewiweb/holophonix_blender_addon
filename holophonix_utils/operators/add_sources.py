@@ -153,14 +153,12 @@ class SNA_OT_Add_Sources_73B0D(bpy.types.Operator, ImportHelper):
                         print(i,"j'ai une name",name_path)
                 if trk_name != "":
                     DEFAULT_GLB = "Dodecahedron"  # Define the default model name
-
                     # Check if model exists in blend file
                     with bpy.data.libraries.load(file_path) as (data_from, data_to):
                         if trk_glb not in data_from.objects:
                             print(f'Model {trk_glb} not found in {file_path}')
                             print(f'Attempting to append default model {DEFAULT_GLB}')
                             trk_glb = DEFAULT_GLB
-
                     print(f'Attempting to append {trk_glb} from {file_path}')
                     result = bpy.ops.wm.append(
                         filepath=file_path,
