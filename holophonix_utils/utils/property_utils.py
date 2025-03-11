@@ -86,6 +86,12 @@ class HolophonixUtilsProperties(bpy.types.PropertyGroup):
         default=True
     )
 
+    project_imported: bpy.props.BoolProperty(
+        name="Project Imported",
+        description="Track whether a .zip file has been imported",
+        default=False
+    )
+
     def register_property(self, context):
         try:
             if not hasattr(bpy.types.Scene, 'holophonix_utils'):
