@@ -4,8 +4,6 @@ import os
 import json
 import numpy
 from math import radians
-import logging
-logger = logging.getLogger(__name__)
 
 class SNA_OT_Add_Sources_73B0D(bpy.types.Operator, ImportHelper):
     bl_idname = "sna.add_sources_73b0d"
@@ -156,23 +154,23 @@ class SNA_OT_Add_Sources_73B0D(bpy.types.Operator, ImportHelper):
                 if trk_name != "":
                     DEFAULT_GLB = "Dodecahedron"  # Define the default model name
 
-                    try:
-                        bpy.ops.wm.append(
-                            filepath=file_path,
-                            directory=os.path.join(file_path, inner_path),
-                            filename=trk_glb
-                        )
-                    except RuntimeError as e:
-                        logger.warning(f'Failed to append object {trk_glb}: {str(e)}. Using default model.')
-                        try:
-                            bpy.ops.wm.append(
-                                filepath=file_path,
-                                directory=os.path.join(file_path, inner_path),
-                                filename=DEFAULT_GLB
-                            )
-                        except RuntimeError as e:
-                            logger.error(f'Failed to append default object {DEFAULT_GLB}: {str(e)}')
-                            continue
+                    # Check if model exists in blend file
+                    with bpy.data.libraries.load(file_path) as (data_from, data_to):
+                        if trk_glb not in data_from.objects:
+                            print(f'Model {trk_glb} not found in {file_path}')
+                            print(f'Attempting to append default model {DEFAULT_GLB}')
+                            trk_glb = DEFAULT_GLB
+
+                    print(f'Attempting to append {trk_glb} from {file_path}')
+                    result = bpy.ops.wm.append(
+                        filepath=file_path,
+                        directory=os.path.join(file_path, inner_path),
+                        filename=trk_glb
+                    )
+                    print(f'Append result: {result}')
+                    if result != {'FINISHED'}:
+                        print(f'Failed to append object {trk_glb}')
+                        continue
                     print(i,'track',trk_number,'created as',trk_name)
                     for trk in bpy.context.selected_objects:
                         trk.name = track +"."+ trk_number +"."+ trk_name
