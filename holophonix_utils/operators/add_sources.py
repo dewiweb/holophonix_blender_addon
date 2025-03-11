@@ -154,6 +154,8 @@ class SNA_OT_Add_Sources_73B0D(bpy.types.Operator, ImportHelper):
                         trk_name = name_path[1]
                         print(i,"j'ai une name",name_path)
                 if trk_name != "":
+                    DEFAULT_GLB = "Dodecahedron"  # Define the default model name
+                    
                     try:
                         bpy.ops.wm.append(
                             filepath=file_path,
@@ -161,8 +163,16 @@ class SNA_OT_Add_Sources_73B0D(bpy.types.Operator, ImportHelper):
                             filename=trk_glb
                         )
                     except RuntimeError as e:
-                        logger.error(f'Failed to append object {trk_glb}: {str(e)}')
-                        continue
+                        logger.warning(f'Failed to append object {trk_glb}: {str(e)}. Using default model.')
+                        try:
+                            bpy.ops.wm.append(
+                                filepath=file_path,
+                                directory=os.path.join(file_path, inner_path),
+                                filename=DEFAULT_GLB
+                            )
+                        except RuntimeError as e:
+                            logger.error(f'Failed to append default object {DEFAULT_GLB}: {str(e)}')
+                            continue
                     print(i,'track',trk_number,'created as',trk_name)
                     for trk in bpy.context.selected_objects:
                         trk.name = track +"."+ trk_number +"."+ trk_name
