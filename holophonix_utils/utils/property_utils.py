@@ -1,4 +1,5 @@
 import bpy
+import os
 from bpy.utils import previews
 
 class HolophonixUtilsProperties(bpy.types.PropertyGroup):
