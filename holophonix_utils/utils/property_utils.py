@@ -116,11 +116,50 @@ class HolophonixUtilsProperties(bpy.types.PropertyGroup):
         default=True
     )
 
+    project_path: bpy.props.StringProperty(
+        name="Project Path",
+        description="Path to the Holophonix project folder",
+        default="",
+        subtype='DIR_PATH'
+    )
     project_imported: bpy.props.BoolProperty(
         name="Project Imported",
-        description="Track whether a .zip file has been imported",
+        description="Whether a Holophonix project has been imported",
         default=False
     )
+    holophonix_hol_files: bpy.props.EnumProperty(
+        name=".hol File",
+        description="Select a .hol file from the Presets directory",
+        items=lambda self, context: self.get_hol_files(context, self.project_path)
+    )
+    
+    def get_hol_files(self, context, project_path):
+        # Check if project_path is set
+        if not project_path:
+            print("No project path provided.")
+            return [("NONE", "No .hol files found", "No .hol files found")]
+    
+        # Construct the path to the Presets directory
+        presets_path = os.path.join(project_path, 'Presets')
+        print(f"Looking for .hol files in: {presets_path}")
+    
+        # Check if the Presets directory exists
+        if not os.path.exists(presets_path):
+            print(f"Presets directory does not exist: {presets_path}")
+            return [("NONE", "Presets directory not found", "Presets directory not found")]
+    
+        # Find all .hol files in the Presets directory
+        hol_files = []
+        for file in os.listdir(presets_path):
+            if file.endswith('.hol'):
+                print(f"Found .hol file: {file}")
+                hol_files.append((file, file, file))
+    
+        if not hol_files:
+            print("No .hol files found in the Presets directory.")
+            return [("NONE", "No .hol files found", "No .hol files found")]
+    
+        return hol_files
 
     def register_property(self, context):
         try:
