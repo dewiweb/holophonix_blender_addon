@@ -48,8 +48,10 @@ classes = [
     SNA_OT_Sources_Exporter_34F69,
     SNA_OT_Add_Speakers_994C8,
     SNA_OT_Add_Handlers,
+    SNA_OT_ExportAndCreateHandlers,
     SNA_OT_Import_Holophonix_Project,
     SNA_OT_Load_Venue,
+    
 ]
 
 def register():

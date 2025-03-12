@@ -6,6 +6,7 @@ from .add_speakers import SNA_OT_Add_Speakers_994C8
 from .add_handlers import SNA_OT_Add_Handlers
 from .import_holophonix_project import SNA_OT_Import_Holophonix_Project
 from .load_venue import SNA_OT_Load_Venue
+from .export_create_handlers import SNA_OT_ExportAndCreateHandlers
 
 __all__ = [
     "SNA_OT_Load_Venue",
@@ -15,5 +16,6 @@ __all__ = [
     "SNA_OT_Import_An_Tree_433Db",
     "SNA_OT_Sources_Exporter_34F69",
     "SNA_OT_Add_Speakers_994C8",
-    "SNA_OT_Add_Handlers"
+    "SNA_OT_Add_Handlers",
+    "SNA_OT_ExportAndCreateHandlers"
 ]
