@@ -6,7 +6,8 @@ class SNA_PT_SPECIALHANDLERS(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'  # The panel will appear in the 3D Viewport
     bl_region_type = 'UI'  # The panel will appear in the sidebar
     bl_context = ''  # Optional: specify the context (e.g., 'objectmode')
-    bl_order = 0  # Order of the panel within its category
+    bl_order = 3  # Order of the panel within its category
+    bl_options = {'DEFAULT_CLOSED'}
     bl_parent_id = 'SNA_PT_HOLOUTILS_1B113'  # Parent panel ID
     bl_ui_units_x = 0  # Width of the panel in UI units
 
