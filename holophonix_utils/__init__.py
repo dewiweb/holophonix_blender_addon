@@ -52,7 +52,8 @@ classes = [
     SNA_OT_Import_Holophonix_Project,
     SNA_OT_Load_Venue,
     SNA_OT_Import_Tracks,
-    SNA_OT_Import_Speakers
+    SNA_OT_Import_Speakers,
+    SNA_OT_Select_Hol_File
     
 ]
 
