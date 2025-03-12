@@ -1,6 +1,10 @@
 import bpy
 from bpy.props import PointerProperty
 from ..operators.import_holophonix_project import SNA_OT_Import_Holophonix_Project
+import os
+
+def load_preview_icon(path):
+    return bpy.data.images.load(path, check_existing=True).preview
 
 class SNA_PT_Import_Holophonix_Project(bpy.types.Panel):
     bl_idname = 'SNA_PT_Import_Holophonix_Project'
@@ -8,6 +12,12 @@ class SNA_PT_Import_Holophonix_Project(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = 'Holophonix'
+    bl_parent_id = 'SNA_PT_HOLOUTILS_1B113'
+    bl_options = {'DEFAULT_CLOSED'}
+
+    def draw_header(self, context):
+        layout = self.layout
+        layout.template_icon(icon_value=context.window_manager.custom_icons['logo_icon'].icon_id, scale=1.2)
 
     def draw(self, context):
         layout = self.layout

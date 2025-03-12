@@ -3,7 +3,7 @@ from .osc_operations import SNA_PT_NodeOSC_Operations
 from .special_handlers_panel import SNA_PT_SPECIALHANDLERS
 from .sources_panel import SNA_PT_SOURCES_11FF6
 from .speakers_panel import SNA_PT_SPEAKERS_F8536
-from .an_settings import SNA_PT_AN_SETTINGS_E1993
+from .an_settings_panel import SNA_PT_AN_SETTINGS_E1993
 from .import_project_panel import SNA_PT_Import_Holophonix_Project
 
 __all__ = [
