@@ -25,6 +25,18 @@ class HolophonixUtilsProperties(bpy.types.PropertyGroup):
                 if item.osc_address == "/track/*":
                     item.enabled = self.enable_track
 
+    def update_incoming_tracks(self, context):
+        if hasattr(context.scene, 'NodeOSC_keys'):
+            for item in context.scene.NodeOSC_keys:
+                if item.osc_direction == "INPUT" and "/track/" in item.osc_address:
+                    item.enabled = self.enable_incoming_tracks
+
+    def update_outgoing_tracks(self, context):
+        if hasattr(context.scene, 'NodeOSC_keys'):
+            for item in context.scene.NodeOSC_keys:
+                if item.osc_direction == "OUTPUT" and "/track/" in item.osc_address:
+                    item.enabled = self.enable_outgoing_tracks
+
     def update_speaker(self, context):
         if hasattr(context.scene, 'NodeOSC_keys'):
             for item in context.scene.NodeOSC_keys:
@@ -47,6 +59,10 @@ class HolophonixUtilsProperties(bpy.types.PropertyGroup):
                 props.enable_dump = item.enabled
             elif item.osc_address == "/track/*" and item.enabled != props.enable_track:
                 props.enable_track = item.enabled
+            elif item.osc_direction == "INPUT" and "/track/" in item.osc_address and item.enabled != props.enable_incoming_tracks:
+                props.enable_incoming_tracks = item.enabled
+            elif item.osc_direction == "OUTPUT" and "/track/" in item.osc_address and item.enabled != props.enable_outgoing_tracks:
+                props.enable_outgoing_tracks = item.enabled
             elif item.osc_address == "/speaker/*" and item.enabled != props.enable_speaker:
                 props.enable_speaker = item.enabled
             elif item.osc_address == "/frames/str" and item.enabled != props.enable_reaperTC:
@@ -64,6 +80,20 @@ class HolophonixUtilsProperties(bpy.types.PropertyGroup):
         description="Enable/disable the track handler",
         default=True,
         update=update_track
+    )
+
+    enable_incoming_tracks: bpy.props.BoolProperty(
+        name="Enable Incoming Tracks",
+        description="Enable/disable incoming track handlers",
+        default=True,
+        update=update_incoming_tracks
+    )
+
+    enable_outgoing_tracks: bpy.props.BoolProperty(
+        name="Enable Outgoing Tracks",
+        description="Enable/disable outgoing track handlers",
+        default=True,
+        update=update_outgoing_tracks
     )
 
     enable_speaker: bpy.props.BoolProperty(
