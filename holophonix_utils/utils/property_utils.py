@@ -132,6 +132,16 @@ class HolophonixUtilsProperties(bpy.types.PropertyGroup):
         description="Select a .hol file from the Presets directory",
         items=lambda self, context: self.get_hol_files(context, self.project_path)
     )
+    def update_selected_hol_file(self, context):
+        if self.holophonix_hol_files:
+            self.selected_hol_file = os.path.join(self.project_path, self.holophonix_hol_files)
+    
+    selected_hol_file: bpy.props.StringProperty(
+        name="Selected HOL File",
+        description="Path to the selected .hol file",
+        subtype='FILE_PATH',
+        update=update_selected_hol_file
+    )
     
     def get_hol_files(self, context, project_path):
         # Check if project_path is set
@@ -141,7 +151,6 @@ class HolophonixUtilsProperties(bpy.types.PropertyGroup):
     
         # Construct the path to the Presets directory
         presets_path = os.path.join(project_path, 'Presets')
-        print(f"Looking for .hol files in: {presets_path}")
     
         # Check if the Presets directory exists
         if not os.path.exists(presets_path):
@@ -152,7 +161,6 @@ class HolophonixUtilsProperties(bpy.types.PropertyGroup):
         hol_files = []
         for file in os.listdir(presets_path):
             if file.endswith('.hol'):
-                print(f"Found .hol file: {file}")
                 hol_files.append((file, file, file))
     
         if not hol_files:
