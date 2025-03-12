@@ -24,12 +24,6 @@ class SNA_OT_Import_Holophonix_Project(bpy.types.Operator):
             with zipfile.ZipFile(self.filepath, 'r') as zip_ref:
                 zip_ref.extractall(temp_dir)
 
-            # Print the contents of the temporary directory
-            print("Contents of the extracted .zip file:")
-            for root, dirs, files in os.walk(temp_dir):
-                print(f"Directory: {root}")
-                for file in files:
-                    print(f"File: {os.path.join(root, file)}")
 
             # Find the master folder by checking for required files
             master_folder = None
