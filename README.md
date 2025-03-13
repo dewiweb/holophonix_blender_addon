@@ -29,6 +29,9 @@ A Blender addon providing various utility functions for Holophonix projects, inc
   - Converts between cartesian and spherical coordinate systems
   - Handles elevation, azimuth, and distance calculations
 
+- **Import `.zip` Files**: Extract and validate Holophonix project folders from `.zip` files.
+- **Optional Tracks and Speakers Import**: Import tracks and speakers from `.hol` files using a dropdown menu.
+
 ### Speaker Management
 
 - **Speaker Import**:
@@ -68,7 +71,7 @@ A Blender addon providing various utility functions for Holophonix projects, inc
 ### OSC Operations
 
 - **Manage OSC Nodes**: Create, configure, and delete OSC nodes for communication. OSC nodes enable you to send and receive OSC messages, allowing you to control external devices or trigger events in Blender.
-- **Configure OSC Settings**: Set parameters like IP address, port, and message format. This ensures that your OSC nodes are properly configured for communication.
+- **Configure OSC Settings**: Parse and import OSC settings from `manifest.json` for real-time communication.
 - **Example Use Cases**:
   - Sending OSC messages to control external devices, such as lighting or sound systems.
   - Receiving OSC messages to trigger events in Blender, such as starting an animation or changing a scene.
@@ -105,6 +108,7 @@ The addon includes a robust venue loading system that:
 - Maintains consistent scale and orientation across imports
 - Includes error handling for invalid archives
 - Supports custom panel icons and default state
+- **Optional Venue Loading**: Load `.glb` files with scale, position, and rotation metadata from `manifest.json`.
 
 ## User Guide
 
