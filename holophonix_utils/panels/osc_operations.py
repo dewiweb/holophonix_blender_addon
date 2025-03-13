@@ -45,11 +45,3 @@ class SNA_PT_NodeOSC_Operations(bpy.types.Panel):
         except Exception as e:
             logger.error(f'Error drawing NodeOSC operations panel: {str(e)}')
             layout.label(text='Error loading panel content', icon='ERROR')
-
-
-def register():
-    bpy.utils.register_class(SNA_PT_NodeOSC_Operations)
-
-
-def unregister():
-    bpy.utils.unregister_class(SNA_PT_NodeOSC_Operations)

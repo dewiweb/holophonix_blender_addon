@@ -16,7 +16,7 @@ bl_info = {
     "author" : "Dewiweb",
     "description" : "",
     "blender" : (4, 3, 0),
-    "version" : (1, 0, 3),  # Updated version to trigger the release workflow
+    "version" : (1, 0, 6),  # Updated version to trigger the release workflow
     "location" : "",
     "warning" : "",
     "doc_url": "",
@@ -40,13 +40,21 @@ classes = [
     SNA_PT_SOURCES_11FF6,
     SNA_PT_SPEAKERS_F8536,
     SNA_PT_AN_SETTINGS_E1993,
+    SNA_PT_Import_Holophonix_Project,
     # Operators
     SNA_OT_Delete_Handlers_C2D71,
     SNA_OT_Add_Sources_73B0D,
     SNA_OT_Import_An_Tree_433Db,
     SNA_OT_Sources_Exporter_34F69,
     SNA_OT_Add_Speakers_994C8,
-    SNA_OT_Add_Handlers
+    SNA_OT_Add_Handlers,
+    SNA_OT_ExportAndCreateHandlers,
+    SNA_OT_Import_Holophonix_Project,
+    SNA_OT_Load_Venue,
+    SNA_OT_Import_Tracks,
+    SNA_OT_Import_Speakers,
+    SNA_OT_Select_Hol_File
+    
 ]
 
 def register():

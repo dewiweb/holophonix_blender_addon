@@ -1,4 +1,5 @@
 import bpy
+from ..operators.export_create_handlers import SNA_OT_ExportAndCreateHandlers
 
 class SNA_PT_SPECIALHANDLERS(bpy.types.Panel):
     bl_label = 'OSC Handlers'
@@ -6,7 +7,8 @@ class SNA_PT_SPECIALHANDLERS(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'  # The panel will appear in the 3D Viewport
     bl_region_type = 'UI'  # The panel will appear in the sidebar
     bl_context = ''  # Optional: specify the context (e.g., 'objectmode')
-    bl_order = 0  # Order of the panel within its category
+    bl_order = 3  # Order of the panel within its category
+    bl_options = {'DEFAULT_CLOSED'}
     bl_parent_id = 'SNA_PT_HOLOUTILS_1B113'  # Parent panel ID
     bl_ui_units_x = 0  # Width of the panel in UI units
 
@@ -18,13 +20,19 @@ class SNA_PT_SPECIALHANDLERS(bpy.types.Panel):
     def draw_header(self, context):
         # Custom header with an icon
         layout = self.layout
-        layout.template_icon(icon_value=244, scale=1.2100000381469727)
+        layout.label(icon='LINKED')
 
     def draw(self, context):
         layout = self.layout
         scene = context.scene
         holophonix_utils = scene.holophonix_utils
         props = context.scene.holophonix_utils
+
+        # Add export button if track objects exist
+        tracks = [obj for obj in bpy.context.scene.objects if "track" in obj.name]
+        if tracks:
+            layout.operator("sna.export_create_handlers", text="Export and Create Handlers", icon='EXPORT')
+            layout.separator()
 
         # Check if NodeOSC is installed
         if "NodeOSC" not in context.preferences.addons:

@@ -29,6 +29,9 @@ A Blender addon providing various utility functions for Holophonix projects, inc
   - Converts between cartesian and spherical coordinate systems
   - Handles elevation, azimuth, and distance calculations
 
+- **Import `.zip` Files**: Extract and validate Holophonix project folders from `.zip` files.
+- **Optional Tracks and Speakers Import**: Import tracks and speakers from `.hol` files using a dropdown menu.
+
 ### Speaker Management
 
 - **Speaker Import**:
@@ -68,7 +71,7 @@ A Blender addon providing various utility functions for Holophonix projects, inc
 ### OSC Operations
 
 - **Manage OSC Nodes**: Create, configure, and delete OSC nodes for communication. OSC nodes enable you to send and receive OSC messages, allowing you to control external devices or trigger events in Blender.
-- **Configure OSC Settings**: Set parameters like IP address, port, and message format. This ensures that your OSC nodes are properly configured for communication.
+- **Configure OSC Settings**: Parse and import OSC settings from `manifest.json` for real-time communication.
 - **Example Use Cases**:
   - Sending OSC messages to control external devices, such as lighting or sound systems.
   - Receiving OSC messages to trigger events in Blender, such as starting an animation or changing a scene.
@@ -81,6 +84,74 @@ A Blender addon providing various utility functions for Holophonix projects, inc
 - **Example Use Cases**:
   - Automating complex animations with imported AN trees, such as character rigging or physics simulations.
   - Sharing AN trees with other users or projects, enabling collaboration and reuse of complex node setups.
+
+### Project Import System
+
+The addon supports importing Holophonix projects from `.zip` archives:
+
+1. **Archive Structure**:
+   - Contains multiple `.hol` preset files
+   - Maintains project relationships and structure
+
+2. **File Selection**:
+   - Provides dropdown menu to choose specific `.hol` files
+   - Presents available presets in user-friendly format
+
+3. **Processing**:
+   - Extracts and processes selected preset files
+   - Maintains consistent project structure
+   - Handles errors and invalid files gracefully
+
+### Venue Loading System
+
+The addon includes a robust venue loading system that:
+- Maintains consistent scale and orientation across imports
+- Includes error handling for invalid archives
+- Supports custom panel icons and default state
+- **Optional Venue Loading**: Load `.glb` files with scale, position, and rotation metadata from `manifest.json`.
+
+## User Guide
+
+### Quick Start
+
+1. **Enable the Addon**:
+   - Go to Edit > Preferences > Add-ons
+   - Search for 'Holophonix Utils' and enable it
+
+2. **Access the Panel**:
+   - Open the 3D View sidebar (N key)
+   - Find the 'Holophonix Utils' tab
+
+3. **Import Your Setup**:
+   - Click 'Import' in the Sources or Speakers panel
+   - Select your `.hol` preset file
+
+4. **Configure OSC**:
+   - Set up your OSC connections in the NodeOSC panel
+   - Enable handlers for the features you need
+
+### Practical Examples
+
+**Live Performance Setup**:
+1. Import your venue's speaker layout
+2. Configure OSC to control audio parameters
+3. Create visualizations that respond to audio
+
+**Interactive Installation**:
+1. Set up multiple Holophonix presets
+2. Create handlers for interactive elements
+3. Sync multiple installations via OSC
+
+### Troubleshooting
+
+**Issue**: Tracks/Speakers not appearing
+- Verify your `.hol` file format
+- Check Blender's console for import errors
+
+**Issue**: OSC not working
+- Confirm IP and port settings
+- Check firewall/network settings
+- Verify NodeOSC is properly configured
 
 ## About Holophonix
 

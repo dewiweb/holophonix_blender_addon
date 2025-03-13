@@ -3,10 +3,13 @@ name: Release Workflow
 on:
   push:
     branches:
-      - master
+      - main
+      - develop
+    paths:
+      - 'holophonix_utils/__init__.py'
 
 permissions:
-  contents: write  # Grant write permissions for the contents scope
+  contents: write
 
 jobs:
   build:
@@ -20,7 +23,7 @@ jobs:
       id: version
       run: |
         VERSION=$(grep -oP '(?<="version" : \()[^)]+' holophonix_utils/__init__.py | tr -d " ")
-        VERSION=${VERSION//,/.}  # Replace commas with dots
+        VERSION=${VERSION//,/.}
         echo "Extracted version: $VERSION"
         echo "version=$VERSION" >> $GITHUB_OUTPUT
 
@@ -34,7 +37,6 @@ jobs:
     - name: Check if version has changed or no previous tag exists
       id: version_check
       run: |
-        # Remove 'v' prefix from previous version for comparison
         NORMALIZED_PREVIOUS=${PREVIOUS_VERSION#v}
         
         if [ "$VERSION" != "$NORMALIZED_PREVIOUS" ] || [ "$PREVIOUS_VERSION" == "v0.0.0" ]; then
@@ -48,13 +50,22 @@ jobs:
         VERSION: ${{ steps.version.outputs.version }}
         PREVIOUS_VERSION: ${{ steps.previous_version.outputs.previous_version }}
 
+    - name: Determine release type
+      id: release_type
+      run: |
+        if [[ $GITHUB_REF == 'refs/heads/develop' ]]; then
+          echo "type=beta" >> $GITHUB_OUTPUT
+        else
+          echo "type=stable" >> $GITHUB_OUTPUT
+        fi
+
     - name: Create Git Tag
       if: steps.version_check.outputs.release == 'true'
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
-        git tag v${{ steps.version.outputs.version }}
-        git push origin v${{ steps.version.outputs.version }}
+        git tag v${{ steps.version.outputs.version }}-${{ steps.release_type.outputs.type }}
+        git push origin v${{ steps.version.outputs.version }}-${{ steps.release_type.outputs.type }}
 
     - name: Zip the addon folder
       if: steps.version_check.outputs.release == 'true'
@@ -68,10 +79,10 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v${{ steps.version.outputs.version }}
-        release_name: Release v${{ steps.version.outputs.version }}
+        tag_name: v${{ steps.version.outputs.version }}-${{ steps.release_type.outputs.type }}
+        release_name: Release v${{ steps.version.outputs.version }} ${{ steps.release_type.outputs.type }}
         draft: false
-        prerelease: false
+        prerelease: ${{ steps.release_type.outputs.type == 'beta' }}
 
     - name: Upload Release Asset
       if: steps.version_check.outputs.release == 'true'
