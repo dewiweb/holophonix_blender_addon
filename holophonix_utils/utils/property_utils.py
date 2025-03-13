@@ -1,4 +1,5 @@
 import bpy
+import os
 from bpy.utils import previews
 
 class HolophonixUtilsProperties(bpy.types.PropertyGroup):
@@ -24,6 +25,18 @@ class HolophonixUtilsProperties(bpy.types.PropertyGroup):
                 if item.osc_address == "/track/*":
                     item.enabled = self.enable_track
 
+    def update_incoming_tracks(self, context):
+        if hasattr(context.scene, 'NodeOSC_keys'):
+            for item in context.scene.NodeOSC_keys:
+                if item.osc_direction == "INPUT" and "/track/" in item.osc_address:
+                    item.enabled = self.enable_incoming_tracks
+
+    def update_outgoing_tracks(self, context):
+        if hasattr(context.scene, 'NodeOSC_keys'):
+            for item in context.scene.NodeOSC_keys:
+                if item.osc_direction == "OUTPUT" and "/track/" in item.osc_address:
+                    item.enabled = self.enable_outgoing_tracks
+
     def update_speaker(self, context):
         if hasattr(context.scene, 'NodeOSC_keys'):
             for item in context.scene.NodeOSC_keys:
@@ -46,6 +59,10 @@ class HolophonixUtilsProperties(bpy.types.PropertyGroup):
                 props.enable_dump = item.enabled
             elif item.osc_address == "/track/*" and item.enabled != props.enable_track:
                 props.enable_track = item.enabled
+            elif item.osc_direction == "INPUT" and "/track/" in item.osc_address and item.enabled != props.enable_incoming_tracks:
+                props.enable_incoming_tracks = item.enabled
+            elif item.osc_direction == "OUTPUT" and "/track/" in item.osc_address and item.enabled != props.enable_outgoing_tracks:
+                props.enable_outgoing_tracks = item.enabled
             elif item.osc_address == "/speaker/*" and item.enabled != props.enable_speaker:
                 props.enable_speaker = item.enabled
             elif item.osc_address == "/frames/str" and item.enabled != props.enable_reaperTC:
@@ -63,6 +80,20 @@ class HolophonixUtilsProperties(bpy.types.PropertyGroup):
         description="Enable/disable the track handler",
         default=True,
         update=update_track
+    )
+
+    enable_incoming_tracks: bpy.props.BoolProperty(
+        name="Enable Incoming Tracks",
+        description="Enable/disable incoming track handlers",
+        default=True,
+        update=update_incoming_tracks
+    )
+
+    enable_outgoing_tracks: bpy.props.BoolProperty(
+        name="Enable Outgoing Tracks",
+        description="Enable/disable outgoing track handlers",
+        default=True,
+        update=update_outgoing_tracks
     )
 
     enable_speaker: bpy.props.BoolProperty(
@@ -84,6 +115,59 @@ class HolophonixUtilsProperties(bpy.types.PropertyGroup):
         description="Enable/disable the populate handler",
         default=True
     )
+
+    project_path: bpy.props.StringProperty(
+        name="Project Path",
+        description="Path to the Holophonix project folder",
+        default="",
+        subtype='DIR_PATH'
+    )
+    project_imported: bpy.props.BoolProperty(
+        name="Project Imported",
+        description="Whether a Holophonix project has been imported",
+        default=False
+    )
+    holophonix_hol_files: bpy.props.EnumProperty(
+        name=".hol File",
+        description="Select a .hol file from the Presets directory",
+        items=lambda self, context: self.get_hol_files(context, self.project_path)
+    )
+    def update_selected_hol_file(self, context):
+        if self.holophonix_hol_files:
+            self.selected_hol_file = os.path.join(self.project_path, self.holophonix_hol_files)
+    
+    selected_hol_file: bpy.props.StringProperty(
+        name="Selected HOL File",
+        description="Path to the selected .hol file",
+        subtype='FILE_PATH',
+        update=update_selected_hol_file
+    )
+    
+    def get_hol_files(self, context, project_path):
+        # Check if project_path is set
+        if not project_path:
+            print("No project path provided.")
+            return [("NONE", "No .hol files found", "No .hol files found")]
+    
+        # Construct the path to the Presets directory
+        presets_path = os.path.join(project_path, 'Presets')
+    
+        # Check if the Presets directory exists
+        if not os.path.exists(presets_path):
+            print(f"Presets directory does not exist: {presets_path}")
+            return [("NONE", "Presets directory not found", "Presets directory not found")]
+    
+        # Find all .hol files in the Presets directory
+        hol_files = []
+        for file in os.listdir(presets_path):
+            if file.endswith('.hol'):
+                hol_files.append((file, file, file))
+    
+        if not hol_files:
+            print("No .hol files found in the Presets directory.")
+            return [("NONE", "No .hol files found", "No .hol files found")]
+    
+        return hol_files
 
     def register_property(self, context):
         try:

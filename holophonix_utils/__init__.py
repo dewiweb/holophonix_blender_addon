@@ -16,7 +16,7 @@ bl_info = {
     "author" : "Dewiweb",
     "description" : "",
     "blender" : (4, 3, 0),
-    "version" : (1, 0, 3),  # Updated version to trigger the release workflow
+    "version" : (1, 0, 6),  # Updated version to trigger the release workflow
     "location" : "",
     "warning" : "",
     "doc_url": "",
@@ -26,21 +26,36 @@ bl_info = {
 
 import bpy
 import os
-from bpy.utils import register_class, unregister_class, previews
+from .utils import *
+from .panels import *
+from .operators import *
 
-from .utils.property_utils import HolophonixUtilsProperties
-from .panels.holoutils_panel import SNA_PT_HOLOUTILS_1B113
-from .panels.osc_operations import SNA_PT_NodeOSC_Operations
-from .operators.delete_handlers import SNA_OT_Delete_Handlers_C2D71
-from .operators.add_sources import SNA_OT_Add_Sources_73B0D
-from .operators.import_an_tree import SNA_OT_Import_An_Tree_433Db
-from .operators.sources_exporter import SNA_OT_Sources_Exporter_34F69
-from .operators.add_speakers import SNA_OT_Add_Speakers_994C8
-from .operators.add_handlers import SNA_OT_Add_Handlers
-from .panels.special_handlers_panel import SNA_PT_SPECIALHANDLERS
-from .panels.sources_panel import SNA_PT_SOURCES_11FF6
-from .panels.speakers_panel import SNA_PT_SPEAKERS_F8536
-from .panels.an_settings import SNA_PT_AN_SETTINGS_E1993
+classes = [
+    # Properties
+    HolophonixUtilsProperties,
+    # Panels
+    SNA_PT_HOLOUTILS_1B113,
+    SNA_PT_NodeOSC_Operations,
+    SNA_PT_SPECIALHANDLERS,
+    SNA_PT_SOURCES_11FF6,
+    SNA_PT_SPEAKERS_F8536,
+    SNA_PT_AN_SETTINGS_E1993,
+    SNA_PT_Import_Holophonix_Project,
+    # Operators
+    SNA_OT_Delete_Handlers_C2D71,
+    SNA_OT_Add_Sources_73B0D,
+    SNA_OT_Import_An_Tree_433Db,
+    SNA_OT_Sources_Exporter_34F69,
+    SNA_OT_Add_Speakers_994C8,
+    SNA_OT_Add_Handlers,
+    SNA_OT_ExportAndCreateHandlers,
+    SNA_OT_Import_Holophonix_Project,
+    SNA_OT_Load_Venue,
+    SNA_OT_Import_Tracks,
+    SNA_OT_Import_Speakers,
+    SNA_OT_Select_Hol_File
+    
+]
 
 def register():
     from bpy.utils import register_class, previews
@@ -52,7 +67,11 @@ def register():
     custom_icons.load('logo_icon', icon_path, 'IMAGE')
     bpy.types.WindowManager.custom_icons = custom_icons
 
-    bpy.utils.register_class(HolophonixUtilsProperties)
+    # Register all classes
+    for cls in classes:
+        bpy.utils.register_class(cls)
+    
+    # Add custom property to the scene
     bpy.types.Scene.holophonix_utils = bpy.props.PointerProperty(type=HolophonixUtilsProperties)
 
     # Defer icon registration until the scene is available
@@ -63,44 +82,15 @@ def register():
 
     bpy.app.handlers.depsgraph_update_post.append(deferred_icon_registration)
 
-    bpy.utils.register_class(SNA_OT_Add_Sources_73B0D)
-    bpy.utils.register_class(SNA_OT_Import_An_Tree_433Db)
-    bpy.utils.register_class(SNA_OT_Sources_Exporter_34F69)
-    bpy.utils.register_class(SNA_OT_Add_Speakers_994C8)
-    bpy.utils.register_class(SNA_OT_Delete_Handlers_C2D71)
-    bpy.utils.register_class(SNA_OT_Add_Handlers)
-    bpy.utils.register_class(SNA_PT_HOLOUTILS_1B113)
-    try:
-        if "NodeOSC" in bpy.context.preferences.addons:
-            if hasattr(bpy.types, 'OSC_PT_Operations'):
-                bpy.utils.register_class(SNA_PT_NodeOSC_Operations)
-            else:
-                bpy.utils.register_class(SNA_PT_NodeOSC_Operations)
-        else:
-            bpy.utils.register_class(SNA_PT_NodeOSC_Operations)
-    except Exception as e:
-        print(f"Error registering NodeOSC operations: {str(e)}")
-    bpy.utils.register_class(SNA_PT_SPECIALHANDLERS)
-    bpy.utils.register_class(SNA_PT_SOURCES_11FF6)
-    bpy.utils.register_class(SNA_PT_SPEAKERS_F8536)
-    bpy.utils.register_class(SNA_PT_AN_SETTINGS_E1993)
-
 def unregister():
     if hasattr(bpy.context, 'scene') and bpy.context.scene is not None:
         bpy.context.scene.holophonix_utils.unregister_icons()
-    bpy.utils.unregister_class(HolophonixUtilsProperties)
+    
+    # Remove custom property from the scene
     del bpy.types.Scene.holophonix_utils
-    bpy.utils.unregister_class(SNA_OT_Add_Sources_73B0D)
-    bpy.utils.unregister_class(SNA_OT_Import_An_Tree_433Db)
-    bpy.utils.unregister_class(SNA_OT_Sources_Exporter_34F69)
-    bpy.utils.unregister_class(SNA_OT_Add_Speakers_994C8)
-    bpy.utils.unregister_class(SNA_OT_Delete_Handlers_C2D71)
-    bpy.utils.unregister_class(SNA_OT_Add_Handlers)
-    bpy.utils.unregister_class(SNA_PT_HOLOUTILS_1B113)
-    bpy.utils.unregister_class(SNA_PT_SPECIALHANDLERS)
-    bpy.utils.unregister_class(SNA_PT_SOURCES_11FF6)
-    bpy.utils.unregister_class(SNA_PT_SPEAKERS_F8536)
-    bpy.utils.unregister_class(SNA_PT_AN_SETTINGS_E1993)
-    bpy.utils.unregister_class(SNA_PT_NodeOSC_Operations)
+    
+    # Unregister all classes in reverse order
+    for cls in reversed(classes):
+        bpy.utils.unregister_class(cls)
 
 from .utils.plugin_utils import plugin_exists, plugin_folder
