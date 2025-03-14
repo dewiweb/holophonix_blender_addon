@@ -6,9 +6,9 @@ import numpy
 from math import radians
 from ..utils.math_utils import cart2sph, sph2cart
 
-class SNA_OT_Add_Sources_73B0D(bpy.types.Operator, ImportHelper):
-    bl_idname = "sna.add_sources_73b0d"
-    bl_label = "Add_Sources"
+class SNA_OT_Add_Tracks_73B0D(bpy.types.Operator, ImportHelper):
+    bl_idname = "sna.add_tracks_73b0d"
+    bl_label = "Add Tracks"
     bl_description = "replace actual tracks by those in imported hol preset file"
     bl_options = {"REGISTER", "UNDO"}
     filter_glob: bpy.props.StringProperty( default='*.hol', options={'HIDDEN'} )

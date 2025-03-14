@@ -1,9 +1,9 @@
 import bpy
 from bpy_extras.io_utils import ExportHelper
 
-class SNA_OT_Sources_Exporter_34F69(bpy.types.Operator, ExportHelper):
-    bl_idname = "sna.sources_exporter_34f69"
-    bl_label = "Sources_Exporter"
+class SNA_OT_Tracks_Exporter_34F69(bpy.types.Operator, ExportHelper):
+    bl_idname = "sna.tracks_exporter_34f69"
+    bl_label = "Export Tracks"
     bl_description = "Export Holo objects to OSC handlers, you can then import them with 'import OSC config'"
     bl_options = {"REGISTER", "UNDO"}
     filter_glob: bpy.props.StringProperty(default='*.json', options={'HIDDEN'})

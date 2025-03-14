@@ -1,8 +1,8 @@
 import bpy
 
-class SNA_PT_SOURCES_11FF6(bpy.types.Panel):
-    bl_label = 'Sources'
-    bl_idname = 'SNA_PT_SOURCES_11FF6'
+class SNA_PT_TRACKS_11FF6(bpy.types.Panel):
+    bl_label = 'Tracks'
+    bl_idname = 'SNA_PT_TRACKS_11FF6'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
@@ -23,8 +23,8 @@ class SNA_PT_SOURCES_11FF6(bpy.types.Panel):
         layout = self.layout
         props = context.scene.holophonix_utils
 
-        # Add operator for importing sources
-        op = layout.operator('sna.add_sources_73b0d', text='Import Sources  From .hol', icon_value=context.window_manager.custom_icons['logo_icon'].icon_id, emboss=True, depress=False)
+        # Add operator for importing tracks
+        op = layout.operator('sna.add_tracks_73b0d', text='Import Tracks From .hol', icon_value=context.window_manager.custom_icons['logo_icon'].icon_id, emboss=True, depress=False)
 
         # Check if there are track handlers in NodeOSC_keys
         if hasattr(context.scene, 'NodeOSC_keys'):
