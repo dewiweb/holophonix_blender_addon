@@ -3,6 +3,7 @@ import os
 import json
 import numpy
 from math import radians
+from ..utils.math_utils import sph2cart
 
 class SNA_OT_Import_Speakers(bpy.types.Operator):
     bl_idname = 'sna.import_speakers'
@@ -69,7 +70,7 @@ class SNA_OT_Import_Speakers(bpy.types.Operator):
                                 spk_sph_coord[1] = float(p_tuple[0])
                             elif param == '/dist':
                                 spk_sph_coord[2] = float(p_tuple[0])
-                                spk_cart_coord = self.sph2cart(float(spk_sph_coord[1]), float(spk_sph_coord[0]), float(spk_sph_coord[2]))
+                                spk_cart_coord = sph2cart(float(spk_sph_coord[1]), float(spk_sph_coord[0]), float(spk_sph_coord[2]))
                             elif param == '/view3D/file3D':
                                 end_loc = len(p_tuple)-5
                                 spk_glb = str(p_tuple[0])[18:end_loc]
@@ -119,9 +120,3 @@ class SNA_OT_Import_Speakers(bpy.types.Operator):
 
         self.report({'INFO'}, 'Speakers imported successfully!')
         return {'FINISHED'}
-
-    def sph2cart(self, elev, azim, radius):
-        z = radius * numpy.sin(radians(elev))
-        x = radius * numpy.cos(radians(elev)) * numpy.cos(radians(azim))
-        y = radius * numpy.cos(radians(elev)) * numpy.sin(radians(azim))
-        return y, x, z

@@ -3,6 +3,7 @@ import os
 import json
 import numpy
 from math import radians
+from ..utils.math_utils import sph2cart
 
 class SNA_OT_Import_Tracks(bpy.types.Operator):
     bl_idname = 'sna.import_tracks'
@@ -24,25 +25,6 @@ class SNA_OT_Import_Tracks(bpy.types.Operator):
             return {'CANCELLED'}
 
         file_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'amadeus.blend')
-
-        def sph2cart(*args):
-            if len(args) == 1:
-                elev = args[0][0, :]
-                azim = args[0][1, :]
-                radius = args[0][2, :]
-                returnAsArray = True
-            elif len(args) == 3:
-                elev = args[0]
-                azim = args[1]
-                radius = args[2]
-                returnAsArray = False
-            z = radius * numpy.sin(radians(elev))
-            x = radius * numpy.cos(radians(elev)) * numpy.cos(radians(azim))
-            y = radius * numpy.cos(radians(elev)) * numpy.sin(radians(azim))
-            if returnAsArray:
-                return numpy.asarray([y, x, z])
-            else:
-                return y, x, z
 
         # Clean up existing tracks
         for obj in bpy.context.scene.objects:

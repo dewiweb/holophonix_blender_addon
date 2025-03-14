@@ -26,13 +26,21 @@ bl_info = {
 
 import bpy
 import os
-from .utils import HolophonixUtilsProperties
+from .utils import (
+    HolophonixUtilsProperties,
+    HandlerProperties,
+    FileProperties,
+    IconUtils
+)
 from .panels import *
 from .operators import *
 
 classes = [
     # Properties
     HolophonixUtilsProperties,
+    HandlerProperties,
+    FileProperties,
+    IconUtils,
     # Panels
     SNA_PT_HOLOUTILS_1B113,
     SNA_PT_NodeOSC_Operations,
@@ -54,7 +62,6 @@ classes = [
     SNA_OT_Import_Tracks,
     SNA_OT_Import_Speakers,
     SNA_OT_Select_Hol_File
-    
 ]
 
 def register():
@@ -70,7 +77,7 @@ def register():
     # Register all classes
     for cls in classes:
         bpy.utils.register_class(cls)
-    
+
     # Add custom property to the scene
     bpy.types.Scene.holophonix_utils = bpy.props.PointerProperty(type=HolophonixUtilsProperties)
 
@@ -85,10 +92,10 @@ def register():
 def unregister():
     if hasattr(bpy.context, 'scene') and bpy.context.scene is not None:
         bpy.context.scene.holophonix_utils.unregister_icons()
-    
+
     # Remove custom property from the scene
     del bpy.types.Scene.holophonix_utils
-    
+
     # Unregister all classes in reverse order
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)

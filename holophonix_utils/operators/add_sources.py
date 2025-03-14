@@ -4,6 +4,7 @@ import os
 import json
 import numpy
 from math import radians
+from ..utils.math_utils import cart2sph, sph2cart
 
 class SNA_OT_Add_Sources_73B0D(bpy.types.Operator, ImportHelper):
     bl_idname = "sna.add_sources_73b0d"
@@ -23,55 +24,6 @@ class SNA_OT_Add_Sources_73B0D(bpy.types.Operator, ImportHelper):
         import json
         import numpy
 
-        def cart2sph(z, y, x):
-            """Convert from cartesian coordinates (x,y,z) to spherical (elevation,
-            azimuth, radius). Output is in degrees.
-            usage:
-                array3xN[el,az,rad] = cart2sph(array3xN[x,y,z])
-                OR
-                elevation, azimuth, radius = cart2sph(x,y,z)
-                If working in DKL space, z = Luminance, y = S and x = LM
-            """
-            width = len(z)
-            elevation = numpy.empty([width, width])
-            radius = numpy.empty([width, width])
-            azimuth = numpy.empty([width, width])
-            radius = numpy.sqrt(x**2 + y**2 + z**2)
-            azimuth = numpy.arctan2(y, x)
-            # Calculating the elevation from x,y up
-            elevation = numpy.arctan2(z, numpy.sqrt(x**2 + y**2))
-            # convert azimuth and elevation angles into degrees
-            azimuth *= 180.0 / numpy.pi
-            elevation *= 180.0 / numpy.pi
-            sphere = numpy.array([elevation, azimuth, radius])
-            sphere = numpy.rollaxis(sphere, 0, 3)
-            return sphere
-
-        def sph2cart(*args):
-            """Convert from spherical coordinates (elevation, azimuth, radius)
-            to cartesian (x,y,z).
-            usage:
-                array3xN[x,y,z] = sph2cart(array3xN[el,az,rad])
-                OR
-                x,y,z = sph2cart(elev, azim, radius)
-            """
-            if len(args) == 1:  # received an Nx3 array
-                elev = args[0][0, :]
-                azim = args[0][1, :]
-                radius = args[0][2, :]
-                returnAsArray = True
-            elif len(args) == 3:
-                elev = args[0]
-                azim = args[1]
-                radius = args[2]
-                returnAsArray = False
-            z = radius * numpy.sin(radians(elev))
-            x = radius * numpy.cos(radians(elev)) * numpy.cos(radians(azim))
-            y = radius * numpy.cos(radians(elev)) * numpy.sin(radians(azim))
-            if returnAsArray:
-                return numpy.asarray([y, x, z])
-            else:
-                return y, x, z
         for obj in bpy.context.scene.objects:
             if "track" in obj.name:
                 bpy.data.objects[obj.name].select_set(True)
@@ -143,7 +95,7 @@ class SNA_OT_Add_Sources_73B0D(bpy.types.Operator, ImportHelper):
                     if dist_path != []:
                         dist_path = dist_path[0].split()
                         trk_sph_coord[2] = float(dist_path[1])
-                        trk_cart_coord = sph2cart(float(trk_sph_coord[1]),float(trk_sph_coord[0]),float(trk_sph_coord[2]))
+                        trk_cart_coord = sph2cart(trk_sph_coord[1], trk_sph_coord[0], trk_sph_coord[2])
                         print(i,"j'ai une dist",dist_path)
                 elif param == params[5]:
                     name_path = [path for path in audio_engine_dict if tuple in path]
