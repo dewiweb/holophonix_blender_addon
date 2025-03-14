@@ -64,21 +64,30 @@ jobs:
           echo "type=stable" >> $GITHUB_OUTPUT
         fi
 
-    - name: Create Git Tag
-      if: steps.version_check.outputs.release == 'true'
+    - name: Check if release exists
+      id: release_check
       run: |
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
+        if gh release view v${{ steps.version.outputs.version }}-${{ steps.release_type.outputs.type }} >/dev/null 2>&1; then
+          echo 'release=false' >> $GITHUB_OUTPUT
+        else
+          echo 'release=true' >> $GITHUB_OUTPUT
+        fi
+
+    - name: Create Git Tag
+      if: steps.version_check.outputs.release == 'true' && steps.release_check.outputs.release == 'true'
+      run: |
+        git config --global user.name 'GitHub Actions'
+        git config --global user.email 'actions@github.com'
         git tag v${{ steps.version.outputs.version }}-${{ steps.release_type.outputs.type }}
         git push origin v${{ steps.version.outputs.version }}-${{ steps.release_type.outputs.type }}
 
     - name: Zip the addon folder
-      if: steps.version_check.outputs.release == 'true'
+      if: steps.version_check.outputs.release == 'true' && steps.release_check.outputs.release == 'true'
       run: |
         zip -r holophonix_utils.zip holophonix_utils
 
     - name: Create Release
-      if: steps.version_check.outputs.release == 'true'
+      if: steps.version_check.outputs.release == 'true' && steps.release_check.outputs.release == 'true'
       id: create_release
       uses: actions/create-release@v1
       env:
@@ -90,7 +99,7 @@ jobs:
         prerelease: ${{ steps.release_type.outputs.type == 'beta' }}
 
     - name: Upload Release Asset
-      if: steps.version_check.outputs.release == 'true'
+      if: steps.version_check.outputs.release == 'true' && steps.release_check.outputs.release == 'true'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
