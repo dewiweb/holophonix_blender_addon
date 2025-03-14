@@ -24,6 +24,13 @@ class SNA_OT_Add_Tracks_73B0D(bpy.types.Operator, ImportHelper):
         import json
         import numpy
 
+        # Create or get Tracks collection
+        tracks_collection = bpy.data.collections.get('Tracks')
+        if not tracks_collection:
+            tracks_collection = bpy.data.collections.new('Tracks')
+            bpy.context.scene.collection.children.link(tracks_collection)
+
+        # Clear existing tracks
         for obj in bpy.context.scene.objects:
             if "track" in obj.name:
                 bpy.data.objects[obj.name].select_set(True)
@@ -123,6 +130,12 @@ class SNA_OT_Add_Tracks_73B0D(bpy.types.Operator, ImportHelper):
                         continue
                     print(i,'track',trk_number,'created as',trk_name)
                     for trk in bpy.context.selected_objects:
+                        # Unlink from all collections
+                        for col in trk.users_collection:
+                            col.objects.unlink(trk)
+                        # Link to Tracks collection
+                        tracks_collection.objects.link(trk)
+
                         trk.name = track +"."+ trk_number +"."+ trk_name
                         trk.name = (trk.name).replace('/','')
                         trk.data.name = trk.name

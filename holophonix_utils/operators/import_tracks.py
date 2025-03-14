@@ -26,6 +26,12 @@ class SNA_OT_Import_Tracks(bpy.types.Operator):
 
         file_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'amadeus.blend')
 
+        # Create or get Tracks collection
+        tracks_collection = bpy.data.collections.get('Tracks')
+        if not tracks_collection:
+            tracks_collection = bpy.data.collections.new('Tracks')
+            bpy.context.scene.collection.children.link(tracks_collection)
+
         # Clean up existing tracks
         for obj in bpy.context.scene.objects:
             if "track" in obj.name:
@@ -98,6 +104,12 @@ class SNA_OT_Import_Tracks(bpy.types.Operator):
                     )
                     if result == {'FINISHED'}:
                         for trk in bpy.context.selected_objects:
+                            # Unlink from all collections
+                            for col in trk.users_collection:
+                                col.objects.unlink(trk)
+                            # Link to Tracks collection
+                            tracks_collection.objects.link(trk)
+
                             trk.name = track + "." + trk_number + "." + trk_name
                             trk.name = trk.name.replace('/', '')
                             trk.data.name = trk.name

@@ -11,6 +11,18 @@ class SNA_OT_Import_Speakers(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
+        # Create or get Speakers collection
+        if 'Speakers' not in bpy.data.collections:
+            speakers_collection = bpy.data.collections.new('Speakers')
+            bpy.context.scene.collection.children.link(speakers_collection)
+        else:
+            speakers_collection = bpy.data.collections['Speakers']
+
+        # Clean up existing speakers in Speakers collection
+        for obj in speakers_collection.objects:
+            bpy.data.objects[obj.name].select_set(True)
+            bpy.ops.object.delete()
+
         props = context.scene.holophonix_utils
         
         if not props.holophonix_hol_files or not props.project_path:
@@ -23,12 +35,6 @@ class SNA_OT_Import_Speakers(bpy.types.Operator):
             return {'CANCELLED'}
 
         file_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'amadeus.blend')
-
-        # Clean up existing speakers
-        for obj in bpy.context.scene.objects:
-            if "speaker" in obj.name:
-                bpy.data.objects[obj.name].select_set(True)
-                bpy.ops.object.delete()
 
         # Clean up unused meshes and materials
         for block in bpy.data.meshes:
@@ -92,11 +98,16 @@ class SNA_OT_Import_Speakers(bpy.types.Operator):
 
                     if result == {'FINISHED'}:
                         for spk in bpy.context.selected_objects:
-                            spk.name = speaker + str(i) + "." + spk_glb
+                            spk.name = speaker + str(i) + '.' + spk_glb
                             spk.name = spk.name.replace('/', '')
                             spk.data.name = spk.name
                             for k in range(0, 3):
                                 spk.location[k] = spk_cart_coord[k]
+
+                            # Remove from any existing collections and add to Speakers collection
+                            for col in spk.users_collection:
+                                col.objects.unlink(spk)
+                            speakers_collection.objects.link(spk)
 
                             spk_material = bpy.data.materials.new(name = spk.name+'.mat')
                             spk.data.materials.clear()

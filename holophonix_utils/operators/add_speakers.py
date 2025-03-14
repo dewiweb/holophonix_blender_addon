@@ -19,6 +19,19 @@ class SNA_OT_Add_Speakers_994C8(bpy.types.Operator, ImportHelper):
         return not False
 
     def execute(self, context):
+        # Create or get Speakers collection
+        if 'Speakers' not in bpy.data.collections:
+            speakers_collection = bpy.data.collections.new('Speakers')
+            bpy.context.scene.collection.children.link(speakers_collection)
+        else:
+            speakers_collection = bpy.data.collections['Speakers']
+
+        # Clean up existing speakers in Speakers collection
+        for obj in speakers_collection.objects:
+            bpy.data.objects[obj.name].select_set(True)
+            print(obj.name, ' deleted')
+            bpy.ops.object.delete()
+
         preset_file_path = self.filepath
         file_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'amadeus.blend')
         Variable = None
@@ -127,11 +140,17 @@ class SNA_OT_Add_Speakers_994C8(bpy.types.Operator, ImportHelper):
                     filename=spk_glb
                     )
                 for spk in bpy.context.selected_objects:
-                    spk.name = speaker +"."+ spk_number +"."+ spk_glb
+                    spk.name = speaker +'.'+ spk_number +'.'+ spk_glb
                     spk.name = (spk.name).replace('/','')
                     spk.data.name = spk.name
                     for k in range(0,3):
                         spk.location[k] = spk_cart_coord[k]
+
+                    # Remove from any existing collections and add to Speakers collection
+                    for col in spk.users_collection:
+                        col.objects.unlink(spk)
+                    speakers_collection.objects.link(spk)
+
                     spk_material = bpy.data.materials.new(name = spk.name+'.mat')
                     spk.data.materials.clear()
                     spk.data.materials.append(spk_material)
