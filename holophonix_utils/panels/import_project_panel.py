@@ -33,7 +33,11 @@ class SNA_PT_Import_Holophonix_Project(bpy.types.Panel):
         
         # Import .zip file button
         layout.operator(SNA_OT_Import_Holophonix_Project.bl_idname, text='Import .zip File')
-        
+
+        # Display project name if imported
+        if utils_props.project_imported and utils_props.project_name:
+            layout.label(text=f"Project: {utils_props.project_name}", icon='FILE_FOLDER')
+
         # Load Venue button (enabled when .zip is imported)
         row = layout.row()
         row.enabled = utils_props.project_imported
