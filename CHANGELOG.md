@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.1.2] - 2025-03-14 (Beta Release)
+
+### Added
+- Centralized collection management system for speakers and tracks
+- `project_name` property for Holophonix project metadata
+- Improved error handling for project import operations
+
+### Changed
+- Updated panel icons for better visual consistency
+- Improved project import functionality and panel UI
+- Enhanced class references in __init__.py
+- Updated terminology from 'sources' to 'tracks'
+
+### Fixed
+- RuntimeError when unlinking objects from collections
+- Duplicate objects in default collection issue
+
+## [1.1.1] - 2025-03-12
+### Added
+- Speaker import functionality
+- .hol file selection operator
+- Improved venue loading operations
+- Enhanced project import functionality
+
+### Changed
+- Updated property utilities
+- Updated core registration system
+
 ## [1.0.5] - 2025-03-12
 ### Added
 - Speaker import functionality
