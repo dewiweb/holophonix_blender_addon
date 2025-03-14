@@ -17,7 +17,7 @@ class SNA_PT_TRACKS_11FF6(bpy.types.Panel):
 
     def draw_header(self, context):
         layout = self.layout
-        layout.label(icon='FILE_SOUND')
+        layout.label(icon='MESH_ICOSPHERE')
 
     def draw(self, context):
         layout = self.layout
