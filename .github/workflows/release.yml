@@ -32,6 +32,16 @@ jobs:
         echo "Extracted version: $VERSION"
         echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+    - name: Validate version format
+      id: version_validation
+      run: |
+        if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+          echo "Invalid version format: $VERSION"
+          exit 1
+        fi
+      env:
+        VERSION: ${{ steps.version.outputs.version }}
+
     - name: Get previous version from latest tag
       id: previous_version
       run: |
@@ -39,43 +49,39 @@ jobs:
         echo "Previous version: $PREVIOUS_VERSION"
         echo "previous_version=$PREVIOUS_VERSION" >> $GITHUB_OUTPUT
 
-    - name: Check if version has changed or no previous tag exists
+    - name: Check version and tags
       id: version_check
       run: |
-        NORMALIZED_PREVIOUS=${PREVIOUS_VERSION#v}
+        # Get all tags for this version
+        EXISTING_TAGS=$(git tag -l "v$VERSION*")
         
-        if [ "$VERSION" != "$NORMALIZED_PREVIOUS" ] || [ "$PREVIOUS_VERSION" == "v0.0.0" ]; then
-          echo "Version has changed or no previous tag exists, proceeding with release"
-          echo "release=true" >> $GITHUB_OUTPUT
-        else
-          echo "Version has not changed, skipping release"
+        # Check if any release exists (beta or stable)
+        if gh release view "v$VERSION-beta" >/dev/null 2>&1 || \
+           gh release view "v$VERSION-stable" >/dev/null 2>&1 || \
+           [ -n "$EXISTING_TAGS" ]; then
+          echo "Release or tag already exists for version $VERSION"
           echo "release=false" >> $GITHUB_OUTPUT
+        else
+          echo "No existing release or tag found for version $VERSION"
+          echo "release=true" >> $GITHUB_OUTPUT
         fi
       env:
         VERSION: ${{ steps.version.outputs.version }}
-        PREVIOUS_VERSION: ${{ steps.previous_version.outputs.previous_version }}
 
     - name: Determine release type
       id: release_type
       run: |
-        if [[ $GITHUB_REF == 'refs/heads/develop' ]]; then
+        FEATURE_NUM=$(echo "$VERSION" | cut -d. -f2)
+        if [ $((FEATURE_NUM % 2)) -eq 1 ]; then
           echo "type=beta" >> $GITHUB_OUTPUT
         else
           echo "type=stable" >> $GITHUB_OUTPUT
         fi
-
-    - name: Check if any release exists
-      id: release_check
-      run: |
-        if gh release view v${{ steps.version.outputs.version }}-beta >/dev/null 2>&1 || \
-           gh release view v${{ steps.version.outputs.version }}-stable >/dev/null 2>&1; then
-          echo 'release=false' >> $GITHUB_OUTPUT
-        else
-          echo 'release=true' >> $GITHUB_OUTPUT
-        fi
+      env:
+        VERSION: ${{ steps.version.outputs.version }}
 
     - name: Create Git Tag
-      if: steps.version_check.outputs.release == 'true' && steps.release_check.outputs.release == 'true'
+      if: steps.version_check.outputs.release == 'true'
       run: |
         git config --global user.name 'GitHub Actions'
         git config --global user.email 'actions@github.com'
@@ -83,12 +89,12 @@ jobs:
         git push origin v${{ steps.version.outputs.version }}-${{ steps.release_type.outputs.type }}
 
     - name: Zip the addon folder
-      if: steps.version_check.outputs.release == 'true' && steps.release_check.outputs.release == 'true'
+      if: steps.version_check.outputs.release == 'true'
       run: |
         zip -r holophonix_utils.zip holophonix_utils
 
     - name: Create Release
-      if: steps.version_check.outputs.release == 'true' && steps.release_check.outputs.release == 'true'
+      if: steps.version_check.outputs.release == 'true'
       id: create_release
       uses: actions/create-release@v1
       env:
@@ -100,7 +106,7 @@ jobs:
         prerelease: ${{ steps.release_type.outputs.type == 'beta' }}
 
     - name: Upload Release Asset
-      if: steps.version_check.outputs.release == 'true' && steps.release_check.outputs.release == 'true'
+      if: steps.version_check.outputs.release == 'true'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
