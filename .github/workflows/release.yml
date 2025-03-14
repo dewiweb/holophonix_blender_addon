@@ -91,7 +91,7 @@ jobs:
     - name: Zip the addon folder
       if: steps.version_check.outputs.release == 'true'
       run: |
-        zip -r holophonix_utils.zip holophonix_utils
+        zip -r holophonix_utils_v${{ steps.version.outputs.version }}_${{ steps.release_type.outputs.type }}.zip holophonix_utils
 
     - name: Create Release
       if: steps.version_check.outputs.release == 'true'
@@ -112,6 +112,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: holophonix_utils.zip
-        asset_name: holophonix_utils.zip
+        asset_path: holophonix_utils_v${{ steps.version.outputs.version }}_${{ steps.release_type.outputs.type }}.zip
+        asset_name: holophonix_utils_v${{ steps.version.outputs.version }}_${{ steps.release_type.outputs.type }}.zip
         asset_content_type: application/zip
