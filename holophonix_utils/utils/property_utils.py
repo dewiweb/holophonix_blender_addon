@@ -127,6 +127,13 @@ class HolophonixUtilsProperties(bpy.types.PropertyGroup):
         description="Whether a Holophonix project has been imported",
         default=False
     )
+
+    project_name: bpy.props.StringProperty(
+        name="Project Name",
+        description="Name of the imported Holophonix project",
+        default=""
+    )
+
     holophonix_hol_files: bpy.props.EnumProperty(
         name=".hol File",
         description="Select a .hol file from the Presets directory",
