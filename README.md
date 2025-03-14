@@ -4,6 +4,25 @@ A Blender addon providing various utility functions for Holophonix projects, inc
 
 ## Features
 
+### Project Import System
+
+The addon provides comprehensive Holophonix project import capabilities:
+
+1. **Archive Processing**
+   - Extracts and validates `.zip` project files
+   - Maintains project relationships and structure
+   - Handles errors and invalid files gracefully
+
+2. **Integrated Workflow**
+   - Single interface for venue, tracks, and speakers
+   - Preserves project metadata from `manifest.json`
+   - Automated NodeOSC handler configuration
+
+3. **Component Management**
+   - Import tracks and speakers from `.hol` files
+   - Load venues from `.glb` files with metadata
+   - Configure OSC settings for real-time control
+
 ### Track Management
 
 - **Track Import**:
@@ -62,20 +81,28 @@ A Blender addon providing various utility functions for Holophonix projects, inc
   - Converts between cartesian and spherical coordinate systems
   - Handles elevation, azimuth, and distance calculations
 
+### Venue Loading System
+
+The enhanced venue loading system:
+- Maintains consistent scale and orientation
+- Applies position/rotation from `manifest.json`
+- Supports custom panel icons and default state
+- Includes robust error handling
+
 ### Handler Management
 
-- **Add Handlers**: Add special handlers to manage specific tasks or events. For example, you can create a handler to trigger an animation when a specific event occurs.
-- **Remove Handlers**: Remove handlers when they are no longer needed. This helps keep your project organized and prevents unnecessary handlers from interfering with your workflow.
-- **Configure Handler Properties**: Set properties such as priority, event type, and callback functions. This allows you to fine-tune your handlers to suit your specific needs.
+Our addon provides integration with NodeOSC for:
+- Automatic creation of track handlers
+- Enable/disable control for incoming/outgoing handlers
+- Configuration of handler properties and priorities
+- Management of handler lifecycle and cleanup
 
-### OSC Operations
+### OSC Integration
 
-- **Manage OSC Nodes**: Create, configure, and delete OSC nodes for communication. OSC nodes enable you to send and receive OSC messages, allowing you to control external devices or trigger events in Blender.
-- **Configure OSC Settings**: Parse and import OSC settings from `manifest.json` for real-time communication.
-- **Example Use Cases**:
-  - Sending OSC messages to control external devices, such as lighting or sound systems.
-  - Receiving OSC messages to trigger events in Blender, such as starting an animation or changing a scene.
-  - Controlling track animations, such as synchronizing audio and visual elements.
+The addon works with NodeOSC to:
+- Configure handler settings for tracks
+- Enable real-time control of audio parameters
+- Support synchronization with visual elements
 
 ### AN Settings
 
@@ -84,31 +111,6 @@ A Blender addon providing various utility functions for Holophonix projects, inc
 - **Example Use Cases**:
   - Automating complex animations with imported AN trees, such as character rigging or physics simulations.
   - Sharing AN trees with other users or projects, enabling collaboration and reuse of complex node setups.
-
-### Project Import System
-
-The addon supports importing Holophonix projects from `.zip` archives:
-
-1. **Archive Structure**:
-   - Contains multiple `.hol` preset files
-   - Maintains project relationships and structure
-
-2. **File Selection**:
-   - Provides dropdown menu to choose specific `.hol` files
-   - Presents available presets in user-friendly format
-
-3. **Processing**:
-   - Extracts and processes selected preset files
-   - Maintains consistent project structure
-   - Handles errors and invalid files gracefully
-
-### Venue Loading System
-
-The addon includes a robust venue loading system that:
-- Maintains consistent scale and orientation across imports
-- Includes error handling for invalid archives
-- Supports custom panel icons and default state
-- **Optional Venue Loading**: Load `.glb` files with scale, position, and rotation metadata from `manifest.json`.
 
 ## User Guide
 
@@ -200,3 +202,10 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
+
+## TODO
+
+1. **Rework Request System**
+   - Transition from `/dump` to `/get` request system
+   - Update all related API calls and endpoints
+   - Ensure backward compatibility during transition
