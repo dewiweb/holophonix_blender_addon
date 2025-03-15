@@ -77,5 +77,13 @@ class SNA_OT_Load_Venue(bpy.types.Operator):
             venue_obj.location.z = venue_obj.location.z + pos['z']
             self.report({'INFO'}, f'New position after translation: {venue_obj.location}')
 
+        if 'scale' in manifest:
+            scale = float(manifest['scale'])
+            self.report({'INFO'}, f'Applying scale: X={scale}, Y={scale}, Z={scale}')
+            venue_obj.scale.x = scale
+            venue_obj.scale.y = scale
+            venue_obj.scale.z = scale
+            self.report({'INFO'}, f'New scale: {venue_obj.scale}')
+
         self.report({'INFO'}, 'Venue loaded successfully!')
         return {'FINISHED'}
