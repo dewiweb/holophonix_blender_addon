@@ -104,6 +104,9 @@ jobs:
         # If no previous tag found, use initial commit
         if [ -z "$PREVIOUS_TAG" ]; then
           PREVIOUS_TAG=$(git rev-list --max-parents=0 HEAD)
+        else
+          # Get the full commit hash for the previous tag
+          PREVIOUS_TAG=$(git rev-list -n 1 $PREVIOUS_TAG)
         fi
         
         # Get all commits since previous tag, excluding merge commits
