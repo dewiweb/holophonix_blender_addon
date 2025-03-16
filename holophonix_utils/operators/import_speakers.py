@@ -4,6 +4,7 @@ import json
 import numpy
 from math import radians
 from ..utils.math_utils import sph2cart
+from ..utils.file_properties import FileProperties
 
 class SNA_OT_Import_Speakers(bpy.types.Operator):
     bl_idname = 'sna.import_speakers'
@@ -23,7 +24,7 @@ class SNA_OT_Import_Speakers(bpy.types.Operator):
             bpy.data.objects[obj.name].select_set(True)
             bpy.ops.object.delete()
 
-        props = context.scene.holophonix_utils
+        props = context.scene.file_properties
         
         if not props.holophonix_hol_files or not props.project_path:
             self.report({'ERROR'}, 'No valid .hol file selected')
