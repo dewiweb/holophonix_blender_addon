@@ -95,9 +95,17 @@ jobs:
     - name: Generate Changelog
       id: changelog
       run: |
-        # Get first commit hash if no previous tag exists
-        FIRST_COMMIT=$(git rev-list --max-parents=0 HEAD)
-        PREVIOUS_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "$FIRST_COMMIT")
+        # Get all tags starting with 'v' and sort them by version
+        ALL_TAGS=$(git tag -l "v*" --sort=-version:refname)
+        
+        # Filter out current version tags (both stable and beta)
+        PREVIOUS_TAG=$(echo "$ALL_TAGS" | grep -v "v$VERSION" | head -n 1)
+        
+        # If no previous tag found, use initial commit
+        if [ -z "$PREVIOUS_TAG" ]; then
+          PREVIOUS_TAG=$(git rev-list --max-parents=0 HEAD)
+        fi
+        
         CHANGELOG=$(git log --pretty=format:'- %s (%h)' $PREVIOUS_TAG..HEAD)
         if [ -z "$CHANGELOG" ]; then
           CHANGELOG="- No significant changes"
@@ -105,6 +113,8 @@ jobs:
         echo "Generated changelog:"
         echo "$CHANGELOG"
         echo "changelog=$CHANGELOG" >> $GITHUB_OUTPUT
+      env:
+        VERSION: ${{ steps.version.outputs.version }}
 
     - name: Validate Changelog
       id: validate_changelog
