@@ -45,9 +45,18 @@ jobs:
     - name: Get Previous Version
       id: previous_version
       run: |
-        # Get all version tags (both vX.X.X and X.X.X formats)
-        ALL_TAGS=$(git tag -l "v*" --sort=-version:refname; git tag -l "[0-9]*.[0-9]*.[0-9]*" --sort=-version:refname | grep -v "v")
+        set -e
         
+        # Get vX.X.X tags
+        echo "Getting vX.X.X tags"
+        V_TAGS=$(git tag -l "v*" --sort=-version:refname || echo "No vX.X.X tags found")
+        
+        # Get X.X.X tags
+        echo "Getting X.X.X tags"
+        NUM_TAGS=$(git tag -l "[0-9]*.[0-9]*.[0-9]*" --sort=-version:refname | grep -v "v" || echo "No X.X.X tags found")
+        
+        # Combine tags
+        ALL_TAGS=$(echo -e "$V_TAGS\n$NUM_TAGS")
         echo "All version tags found:"
         echo "$ALL_TAGS"
         
@@ -60,7 +69,7 @@ jobs:
         else
           echo "Previous version tag found: $PREVIOUS_TAG"
           # Get the full commit hash for the previous tag
-          PREVIOUS_TAG=$(git rev-list -n 1 $PREVIOUS_TAG)
+          PREVIOUS_TAG=$(git rev-list -n 1 $PREVIOUS_TAG || echo "Failed to get commit hash for tag $PREVIOUS_TAG")
         fi
         
         echo "Using commit hash: $PREVIOUS_TAG as previous version"
