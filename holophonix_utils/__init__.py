@@ -29,9 +29,9 @@ import os
 from .utils import (
     HolophonixUtilsProperties,
     HandlerProperties,
-    FileProperties,
     IconUtils
 )
+from .utils.file_properties import FileProperties
 from .panels import *
 from .operators import *
 
@@ -80,6 +80,7 @@ def register():
 
     # Add custom property to the scene
     bpy.types.Scene.holophonix_utils = bpy.props.PointerProperty(type=HolophonixUtilsProperties)
+    bpy.types.Scene.file_properties = bpy.props.PointerProperty(type=FileProperties)
 
     # Defer icon registration until the scene is available
     def deferred_icon_registration(scene):
@@ -95,6 +96,7 @@ def unregister():
 
     # Remove custom property from the scene
     del bpy.types.Scene.holophonix_utils
+    del bpy.types.Scene.file_properties
 
     # Unregister all classes in reverse order
     for cls in reversed(classes):

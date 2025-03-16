@@ -3,6 +3,7 @@ from bpy.props import PointerProperty
 from ..operators.import_holophonix_project import SNA_OT_Import_Holophonix_Project
 from ..operators.import_tracks import SNA_OT_Import_Tracks
 from ..operators.import_speakers import SNA_OT_Import_Speakers
+from ..utils.file_properties import FileProperties
 import os
 
 # Track last selected file for debug print
@@ -24,7 +25,7 @@ class SNA_PT_Import_Holophonix_Project(bpy.types.Panel):
     def draw(self, context):
         global _last_hol_file
         layout = self.layout
-        utils_props = context.scene.holophonix_utils
+        utils_props = context.scene.file_properties
         
         # Debug print only when value changes
         if utils_props.holophonix_hol_files != _last_hol_file:

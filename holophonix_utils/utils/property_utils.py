@@ -1,6 +1,7 @@
 import bpy
 import os
 from bpy.utils import previews
+from ..utils.file_properties import FileProperties
 
 class HolophonixUtilsProperties(bpy.types.PropertyGroup):
     def register_icons(self):
@@ -115,7 +116,7 @@ class HolophonixUtilsProperties(bpy.types.PropertyGroup):
         description="Enable/disable the populate handler",
         default=True
     )
-
+    '''
     project_path: bpy.props.StringProperty(
         name="Project Path",
         description="Path to the Holophonix project folder",
@@ -137,7 +138,7 @@ class HolophonixUtilsProperties(bpy.types.PropertyGroup):
     holophonix_hol_files: bpy.props.EnumProperty(
         name=".hol File",
         description="Select a .hol file from the Presets directory",
-        items=lambda self, context: self.get_hol_files(context, self.project_path)
+        items=lambda self, context: FileProperties.get_hol_files(self, context, self.project_path)
     )
     def update_selected_hol_file(self, context):
         if self.holophonix_hol_files:
@@ -149,6 +150,7 @@ class HolophonixUtilsProperties(bpy.types.PropertyGroup):
         subtype='FILE_PATH',
         update=update_selected_hol_file
     )
+    
     
     def get_hol_files(self, context, project_path):
         # Check if project_path is set
@@ -175,6 +177,7 @@ class HolophonixUtilsProperties(bpy.types.PropertyGroup):
             return [("NONE", "No .hol files found", "No .hol files found")]
     
         return hol_files
+    '''
 
     def register_property(self, context):
         try:
