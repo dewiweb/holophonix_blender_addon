@@ -2,6 +2,7 @@ import bpy
 import json
 import os
 import math
+from ..utils.file_properties import FileProperties
 
 class SNA_OT_Load_Venue(bpy.types.Operator):
     bl_idname = 'sna.load_venue'
@@ -11,7 +12,7 @@ class SNA_OT_Load_Venue(bpy.types.Operator):
 
     def execute(self, context):
         # Path to the extracted project directory
-        project_dir = os.path.splitext(bpy.context.scene.holophonix_utils.project_path)[0]
+        project_dir = os.path.splitext(bpy.context.scene.file_properties.project_path)[0]
 
         # Load manifest.json
         manifest_path = os.path.join(project_dir, 'manifest.json')
@@ -50,6 +51,21 @@ class SNA_OT_Load_Venue(bpy.types.Operator):
         
         # Set the venue object to the parent
         venue_obj = parent_obj
+
+        # Track venue-related assets
+        venue_meshes = set()
+        venue_materials = set()
+
+        for obj in imported_objects:
+            if obj.data:
+                venue_meshes.add(obj.data.name)
+            for mat_slot in obj.material_slots:
+                if mat_slot.material:
+                    venue_materials.add(mat_slot.material.name)
+
+        # Store in scene properties
+        context.scene['venue_meshes'] = list(venue_meshes)
+        context.scene['venue_materials'] = list(venue_materials)
 
         if 'rotation' in manifest:
             # Convert three.js rotations to Blender's coordinate system
