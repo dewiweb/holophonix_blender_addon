@@ -80,6 +80,27 @@ jobs:
       env:
         VERSION: ${{ steps.version.outputs.version }}
 
+    - name: Generate Changelog
+      id: changelog
+      run: |
+        CHANGELOG=$(git log --pretty=format:'- %s (%h)' ${{ steps.previous_version.outputs.previous_version }}..HEAD)
+        if [ -z "$CHANGELOG" ]; then
+          CHANGELOG="- No significant changes"
+        fi
+        echo "Generated changelog:"
+        echo "$CHANGELOG"
+        echo "changelog=$CHANGELOG" >> $GITHUB_OUTPUT
+
+    - name: Validate Changelog
+      id: validate_changelog
+      run: |
+        if echo "$CHANGELOG" | grep -q 'Merge pull request'; then
+          echo "Changelog contains merge commits - please squash commits before release"
+          exit 1
+        fi
+      env:
+        CHANGELOG: ${{ steps.changelog.outputs.changelog }}
+
     - name: Create Git Tag
       if: steps.version_check.outputs.release == 'true'
       run: |
@@ -104,6 +125,9 @@ jobs:
         release_name: Release v${{ steps.version.outputs.version }} ${{ steps.release_type.outputs.type }}
         draft: false
         prerelease: ${{ steps.release_type.outputs.type == 'beta' }}
+        body: |
+          Changelog:
+          ${{ steps.changelog.outputs.changelog }}
 
     - name: Upload Release Asset
       if: steps.version_check.outputs.release == 'true'
