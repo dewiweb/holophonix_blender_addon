@@ -108,25 +108,14 @@ jobs:
     - name: Generate Changelog
       id: changelog
       run: |
-        # Get all tags starting with 'v' and sort them by version
-        ALL_TAGS=$(git tag -l "v*" --sort=-version:refname)
-        
-        # Filter out current version tags (both stable and beta)
-        PREVIOUS_TAG=$(echo "$ALL_TAGS" | grep -v "v$VERSION" | head -n 1)
-        
-        # If no previous tag found, use initial commit
-        if [ -z "$PREVIOUS_TAG" ]; then
-          PREVIOUS_TAG=$(git rev-list --max-parents=0 HEAD)
-        else
-          # Get the full commit hash for the previous tag
-          PREVIOUS_TAG=$(git rev-list -n 1 $PREVIOUS_TAG)
-        fi
-        
         # Get all commits since previous tag, excluding merge commits
-        CHANGELOG=$(git log --pretty=format:'- %s (%h)' --no-merges $PREVIOUS_TAG..HEAD)
+        CHANGELOG=$(git log --oneline --no-merges $PREVIOUS_TAG..HEAD)
         
         if [ -z "$CHANGELOG" ]; then
           CHANGELOG="- No significant changes"
+        else
+          # Format the changelog with bullet points
+          CHANGELOG=$(echo "$CHANGELOG" | sed 's/^/- /')
         fi
         
         echo "Generated changelog:"
