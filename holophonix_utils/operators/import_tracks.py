@@ -33,19 +33,33 @@ class SNA_OT_Import_Tracks(bpy.types.Operator):
             tracks_collection = bpy.data.collections.new('Tracks')
             bpy.context.scene.collection.children.link(tracks_collection)
 
-        # Clean up existing tracks
+        # Track used meshes and materials
+        track_meshes = set()
+        track_materials = set()
+        tracks_to_delete = []
+
+        # Find all track objects
         for obj in bpy.context.scene.objects:
             if "track" in obj.name:
-                bpy.data.objects[obj.name].select_set(True)
-                bpy.ops.object.delete()
+                # Collect used meshes and materials
+                if obj.data:
+                    track_meshes.add(obj.data.name)
+                for mat_slot in obj.material_slots:
+                    if mat_slot.material:
+                        track_materials.add(mat_slot.material.name)
+                tracks_to_delete.append(obj)
 
-        # Clean up unused meshes and materials
-        for block in bpy.data.meshes:
-            if block.users == 0:
-                bpy.data.meshes.remove(block)
-        for block in bpy.data.materials:
-            if block.users == 0:
-                bpy.data.materials.remove(block)
+        # Delete track objects directly
+        for obj in tracks_to_delete:
+            bpy.data.objects.remove(obj, do_unlink=True)
+
+        # Clean up track meshes and materials
+        for mesh_name in track_meshes:
+            if mesh_name in bpy.data.meshes:
+                bpy.data.meshes.remove(bpy.data.meshes[mesh_name])
+        for mat_name in track_materials:
+            if mat_name in bpy.data.materials:
+                bpy.data.materials.remove(bpy.data.materials[mat_name])
 
         with open(preset_file_path) as f:
             hol_file_content = json.load(f)

@@ -31,17 +31,33 @@ class SNA_OT_Add_Tracks_73B0D(bpy.types.Operator, ImportHelper):
             bpy.context.scene.collection.children.link(tracks_collection)
 
         # Clear existing tracks
+        track_meshes = set()
+        track_materials = set()
+        tracks_to_delete = []
+
+        # Find all track objects
         for obj in bpy.context.scene.objects:
             if "track" in obj.name:
-                bpy.data.objects[obj.name].select_set(True)
-                print(obj.name, ' deleted')
-                bpy.ops.object.delete()
-        for block in bpy.data.meshes:
-            if block.users == 0:
-                bpy.data.meshes.remove(block)
-        for block in bpy.data.materials:
-            if block.users == 0:
-                bpy.data.materials.remove(block)
+                # Collect used meshes and materials
+                if obj.data:
+                    track_meshes.add(obj.data.name)
+                for mat_slot in obj.material_slots:
+                    if mat_slot.material:
+                        track_materials.add(mat_slot.material.name)
+                tracks_to_delete.append(obj)
+
+        # Delete track objects directly
+        for obj in tracks_to_delete:
+            bpy.data.objects.remove(obj, do_unlink=True)
+
+        # Clean up track meshes and materials
+        for mesh_name in track_meshes:
+            if mesh_name in bpy.data.meshes:
+                bpy.data.meshes.remove(bpy.data.meshes[mesh_name])
+        for mat_name in track_materials:
+            if mat_name in bpy.data.materials:
+                bpy.data.materials.remove(bpy.data.materials[mat_name])
+
         with open(preset_file_path) as f:
                 hol_file_content = json.load(f)
                 audio_engine_dict = hol_file_content['ae']

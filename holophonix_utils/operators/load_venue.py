@@ -10,6 +10,33 @@ class SNA_OT_Load_Venue(bpy.types.Operator):
     bl_description = 'Load the venue from the imported Holophonix project'
     bl_options = {'REGISTER', 'UNDO'}
 
+    def _remove_existing_venue(self, context):
+        # Find existing venue object
+        venue_obj = next((obj for obj in bpy.data.objects if obj.name == 'Venue'), None)
+        if not venue_obj:
+            return
+
+        # Collect all objects in hierarchy
+        all_objects = [venue_obj] + list(venue_obj.children_recursive)
+
+        # Clean up materials and data
+        for obj in all_objects:
+            # Materials
+            for mat_slot in obj.material_slots:
+                if mat_slot.material:
+                    bpy.data.materials.remove(mat_slot.material)
+            # Data
+            if obj.data:
+                data_type = type(obj.data).__name__.lower()
+                if data_type in dir(bpy.data):
+                    data_collection = getattr(bpy.data, data_type + 's')
+                    if obj.data.name in data_collection:
+                        data_collection.remove(obj.data)
+
+        # Remove all objects
+        for obj in reversed(all_objects):
+            bpy.data.objects.remove(obj, do_unlink=True)
+
     def execute(self, context):
         # Path to the extracted project directory
         project_dir = os.path.splitext(bpy.context.scene.file_properties.project_path)[0]
@@ -39,7 +66,11 @@ class SNA_OT_Load_Venue(bpy.types.Operator):
 
         # Import the GLTF file and group all objects
         bpy.ops.import_scene.gltf(filepath=venue_path)
-        
+
+        # Only clean up existing venue if import was successful
+        if bpy.context.selected_objects:
+            self._remove_existing_venue(context)
+
         # Create a new empty object as parent
         parent_obj = bpy.data.objects.new('Venue', None)
         bpy.context.scene.collection.objects.link(parent_obj)

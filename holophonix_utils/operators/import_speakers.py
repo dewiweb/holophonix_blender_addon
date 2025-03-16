@@ -19,11 +19,6 @@ class SNA_OT_Import_Speakers(bpy.types.Operator):
         else:
             speakers_collection = bpy.data.collections['Speakers']
 
-        # Clean up existing speakers in Speakers collection
-        for obj in speakers_collection.objects:
-            bpy.data.objects[obj.name].select_set(True)
-            bpy.ops.object.delete()
-
         props = context.scene.file_properties
         
         if not props.holophonix_hol_files or not props.project_path:
@@ -35,20 +30,41 @@ class SNA_OT_Import_Speakers(bpy.types.Operator):
             self.report({'ERROR'}, 'Selected .hol file does not exist')
             return {'CANCELLED'}
 
-        file_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'amadeus.blend')
+        # Only clean up after successful file validation
+        # Track used meshes and materials
+        speaker_meshes = set()
+        speaker_materials = set()
+        speakers_to_delete = []
 
-        # Clean up unused meshes and materials
-        for block in bpy.data.meshes:
-            if block.users == 0:
-                bpy.data.meshes.remove(block)
-        for block in bpy.data.materials:
-            if block.users == 0:
-                bpy.data.materials.remove(block)
+        # Find all speaker objects
+        for obj in bpy.context.scene.objects:
+            if "speaker" in obj.name:
+                # Collect used meshes and materials
+                if obj.data:
+                    speaker_meshes.add(obj.data.name)
+                for mat_slot in obj.material_slots:
+                    if mat_slot.material:
+                        speaker_materials.add(mat_slot.material.name)
+                speakers_to_delete.append(obj)
+
+        # Delete speaker objects directly
+        for obj in speakers_to_delete:
+            bpy.data.objects.remove(obj, do_unlink=True)
+
+        # Clean up speaker meshes and materials
+        for mesh_name in speaker_meshes:
+            if mesh_name in bpy.data.meshes:
+                bpy.data.meshes.remove(bpy.data.meshes[mesh_name])
+        for mat_name in speaker_materials:
+            if mat_name in bpy.data.materials:
+                bpy.data.materials.remove(bpy.data.materials[mat_name])
 
         with open(preset_file_path) as f:
             hol_file_content = json.load(f)
             hol_dict = hol_file_content['hol']
             hol_keys = list(hol_dict.keys())
+
+            file_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'amadeus.blend')
 
             for i in range(1, 512):
                 spk_sph_coord = [0, 0, 0]
@@ -129,6 +145,14 @@ class SNA_OT_Import_Speakers(bpy.types.Operator):
                                     spk.rotation_euler[0] = radians(float(spk_tilt))
                             else:
                                 tracking = spk.constraints.new(type='TRACK_TO')
+
+        # Clean up unused meshes and materials
+        for block in bpy.data.meshes:
+            if block.users == 0:
+                bpy.data.meshes.remove(block)
+        for block in bpy.data.materials:
+            if block.users == 0:
+                bpy.data.materials.remove(block)
 
         self.report({'INFO'}, 'Speakers imported successfully!')
         return {'FINISHED'}

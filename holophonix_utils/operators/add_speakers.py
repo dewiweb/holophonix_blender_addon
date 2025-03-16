@@ -26,22 +26,42 @@ class SNA_OT_Add_Speakers_994C8(bpy.types.Operator, ImportHelper):
         else:
             speakers_collection = bpy.data.collections['Speakers']
 
+        # Track used meshes and materials
+        speaker_meshes = set()
+        speaker_materials = set()
+        speakers_to_delete = []
+
+        # Find all speaker objects
+        for obj in bpy.context.scene.objects:
+            if "speaker" in obj.name:
+                # Collect used meshes and materials
+                if obj.data:
+                    speaker_meshes.add(obj.data.name)
+                for mat_slot in obj.material_slots:
+                    if mat_slot.material:
+                        speaker_materials.add(mat_slot.material.name)
+                speakers_to_delete.append(obj)
+
+        # Delete speaker objects directly
+        for obj in speakers_to_delete:
+            bpy.data.objects.remove(obj, do_unlink=True)
+
+        # Clean up speaker meshes and materials
+        for mesh_name in speaker_meshes:
+            if mesh_name in bpy.data.meshes:
+                bpy.data.meshes.remove(bpy.data.meshes[mesh_name])
+        for mat_name in speaker_materials:
+            if mat_name in bpy.data.materials:
+                bpy.data.materials.remove(bpy.data.materials[mat_name])
+
         # Clean up existing speakers in Speakers collection
         for obj in speakers_collection.objects:
             bpy.data.objects[obj.name].select_set(True)
             print(obj.name, ' deleted')
             bpy.ops.object.delete()
 
-        preset_file_path = self.filepath
-        file_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'amadeus.blend')
-        Variable = None
-
         for obj in bpy.context.scene.objects:
             if "Empty" in obj.name:
-                bpy.data.objects[obj.name].select_set(True)
-                print(obj.name, ' deleted')
-                bpy.ops.object.delete()
-            elif "speaker" in obj.name:
                 bpy.data.objects[obj.name].select_set(True)
                 print(obj.name, ' deleted')
                 bpy.ops.object.delete()
@@ -53,6 +73,10 @@ class SNA_OT_Add_Speakers_994C8(bpy.types.Operator, ImportHelper):
                 bpy.data.materials.remove(block)
 
         bpy.ops.object.empty_add(type='PLAIN_AXES')
+
+        preset_file_path = self.filepath
+        file_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'amadeus.blend')
+        Variable = None
 
         with open(preset_file_path) as f:
             preset_content = json.load(f)
@@ -111,7 +135,7 @@ class SNA_OT_Add_Speakers_994C8(bpy.types.Operator, ImportHelper):
                             p_tuple = hol_dict[tuple]
                             spk_dist = p_tuple[0]
                             spk_sph_coord[2] = float(spk_dist)
-                            spk_cart_coord = sph2cart(spk_sph_coord)
+                            spk_cart_coord = sph2cart(float(spk_sph_coord[1]), float(spk_sph_coord[0]), float(spk_sph_coord[2]))
                     elif param == params[4]:
                         if tuple in hol_keys:
                             p_tuple = hol_dict[tuple]
