@@ -4,6 +4,7 @@ import json
 import numpy
 from math import radians
 from ..utils.math_utils import sph2cart
+from ..utils.file_properties import FileProperties
 
 class SNA_OT_Import_Tracks(bpy.types.Operator):
     bl_idname = 'sna.import_tracks'
@@ -11,7 +12,7 @@ class SNA_OT_Import_Tracks(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        props = context.scene.holophonix_utils
+        props = context.scene.file_properties
         print(f"Selected .hol file: {props.holophonix_hol_files}")  # Debug print
         
         if not props.holophonix_hol_files or not props.project_path:

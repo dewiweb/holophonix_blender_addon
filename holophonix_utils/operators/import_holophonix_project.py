@@ -3,6 +3,7 @@ import os
 import zipfile
 import tempfile
 import shutil
+from ..utils.file_properties import FileProperties
 
 class SNA_OT_Import_Holophonix_Project(bpy.types.Operator):
     bl_idname = "sna.import_holophonix_project"
@@ -60,13 +61,13 @@ class SNA_OT_Import_Holophonix_Project(bpy.types.Operator):
             # Extract project name from master folder
             project_name = os.path.basename(master_folder)
 
-            # Set project path and name in HolophonixUtilsProperties
-            context.scene.holophonix_utils.project_path = project_folder
-            context.scene.holophonix_utils.project_name = project_name
+            # Set project path and name in FileProperties
+            context.scene.file_properties.project_path = project_folder
+            context.scene.file_properties.project_name = project_name
             print(f"Project '{project_name}' imported successfully! Path: {project_folder}")
 
             self.report({'INFO'}, f'Project "{project_name}" imported successfully!')
-        context.scene.holophonix_utils.project_imported = True
+        context.scene.file_properties.project_imported = True
         return {'FINISHED'}
 
     def invoke(self, context, event):
