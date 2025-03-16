@@ -47,21 +47,18 @@ jobs:
       run: |
         set -e
         
-        # Get vX.X.X tags
-        echo "Getting vX.X.X tags"
-        V_TAGS=$(git tag -l "v*" --sort=-version:refname || echo "No vX.X.X tags found")
+        # Fetch all tags from remote
+        git fetch --tags
         
-        # Get X.X.X tags
-        echo "Getting X.X.X tags"
-        NUM_TAGS=$(git tag -l "[0-9]*.[0-9]*.[0-9]*" --sort=-version:refname | grep -v "v" || echo "No X.X.X tags found")
+        # Get all version tags (including beta)
+        echo "Getting all version tags"
+        ALL_TAGS=$(git tag -l "v*" --sort=-version:refname)
         
-        # Combine tags
-        ALL_TAGS=$(echo -e "$V_TAGS\n$NUM_TAGS")
         echo "All version tags found:"
         echo "$ALL_TAGS"
         
-        # Filter out current version tags
-        PREVIOUS_TAG=$(echo "$ALL_TAGS" | grep -v "v$VERSION" | grep -v "^$VERSION" | head -n 1)
+        # Filter out current version tags (including beta)
+        PREVIOUS_TAG=$(echo "$ALL_TAGS" | grep -v "v$VERSION" | head -n 1)
         
         if [ -z "$PREVIOUS_TAG" ]; then
           echo "No previous version tag found, using initial commit"
