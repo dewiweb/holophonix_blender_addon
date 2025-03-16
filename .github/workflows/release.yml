@@ -45,9 +45,21 @@ jobs:
     - name: Get previous version from latest tag
       id: previous_version
       run: |
-        PREVIOUS_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-        echo "Previous version: $PREVIOUS_VERSION"
-        echo "previous_version=$PREVIOUS_VERSION" >> $GITHUB_OUTPUT
+        # Get all tags starting with 'v' and sort them by version
+        ALL_TAGS=$(git tag -l "v*" --sort=-version:refname)
+        
+        # Filter out current version tags (both stable and beta)
+        PREVIOUS_TAG=$(echo "$ALL_TAGS" | grep -v "v$VERSION" | head -n 1)
+        
+        # If no previous tag found, use initial commit
+        if [ -z "$PREVIOUS_TAG" ]; then
+          PREVIOUS_TAG=$(git rev-list --max-parents=0 HEAD)
+        fi
+        
+        echo "Previous version: $PREVIOUS_TAG"
+        echo "previous_version=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
+      env:
+        VERSION: ${{ steps.version.outputs.version }}
 
     - name: Check version and tags
       id: version_check
