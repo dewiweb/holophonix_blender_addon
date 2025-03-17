@@ -135,6 +135,11 @@ jobs:
           done
         fi
 
+    - name: Debug Changelog
+      run: |
+        echo "Contents of CHANGELOG.md:"
+        cat CHANGELOG.md
+
     - name: Validate Changelog
       id: validate_changelog
       run: |
