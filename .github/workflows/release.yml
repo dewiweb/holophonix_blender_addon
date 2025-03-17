@@ -51,7 +51,9 @@ jobs:
 
     - name: Generate changelog
       run: |
-        git log ${{ steps.previous_tag.outputs.PREVIOUS_TAG }}..HEAD --pretty=format:'- %s' > CHANGELOG.md
+        echo "# Changelog" > CHANGELOG.md
+        echo "## Changes since ${{ steps.previous_tag.outputs.PREVIOUS_TAG }}" >> CHANGELOG.md
+        git log ${{ steps.previous_tag.outputs.PREVIOUS_TAG }}..HEAD --pretty=format:'- **%h** %s (by %an)' >> CHANGELOG.md
 
     - name: Debug Changelog
       run: |
