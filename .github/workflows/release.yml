@@ -52,26 +52,6 @@ jobs:
         PREVIOUS_TAG=$(git tag -l "v*" --sort=-version:refname | grep -v "$CURRENT_VERSION" | head -n 1)
         echo "PREVIOUS_TAG=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
 
-    - name: Generate Changelog
-      uses: mikepenz/release-changelog-builder-action@v3
-      with:
-        configuration: |
-          {"categories": [{"title": "Features", "labels": ["feature"]}]}
-        token: ${{ secrets.GITHUB_TOKEN }}
-        fromTag: ${{ steps.previous_tag.outputs.PREVIOUS_TAG }}
-        toTag: v${{ steps.version.outputs.version }}
-        output: "changelog.md"
-
-    - name: Validate Changelog
-      id: validate_changelog
-      run: |
-        if echo "$CHANGELOG" | grep -q 'Merge pull request'; then
-          echo "Changelog contains merge commits - please squash commits before release"
-          exit 1
-        fi
-      env:
-        CHANGELOG: ${{ steps.changelog.outputs.changelog }}
-
     - name: Check version and tags
       id: version_check
       run: |
@@ -125,7 +105,6 @@ jobs:
       with:
         tag_name: v${{ steps.version.outputs.version }}
         release_name: Version ${{ steps.version.outputs.version }}
-        body: ${{ steps.changelog.outputs.changelog }}
         draft: false
         prerelease: ${{ steps.release_type.outputs.type == 'beta' }}
 

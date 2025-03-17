@@ -1,36 +1,30 @@
 # Changelog
-## Changes since v1.1.1-beta
-- **Improve** changelog generation with Markdown formatting (`eeb232d`)
-- **Update** release workflow configuration (`7d2894c`)
-- **fix**: improve commit message parsing for changelog generation (`2d4996b`)
-- **fix**: improve changelog generation to handle all commit formats (`95816af`)
-- **fix**: revert version number to 1.1.2 and improve changelog generation (`d4faafa`)
-- ✨ (feature) Implement default .hol file selection from manifest (`68d75ee`)
-- **Bump** version to 1.1.6 to trigger release workflow (`5d908be`)
-- **Update** changelog generation to use git log --oneline (`eae2a55`)
-- **Fix** tag detection to handle beta tags (`6956817`)
-- **Add** error handling and debugging to tag detection (`5406f82`)
-- **Improve** version tag detection logic (`77cd1b5`)
-- **Improve** changelog generation by converting previous tag to commit hash (`8ea87be`)
-- **Improve** changelog generation by excluding merge commits (`2d6855a`)
-- **Update** release workflow and bump version to 1.1.5 (`e5e2d21`)
-- **Update** release workflow to properly handle version tags with -stable and -beta suffixes (`bd30878`)
-- **Bump** version to 1.1.4 to trigger release workflow (`fbe68ae`)
-- **Enhance** speaker-related operators with improved import and add functionality (`0849814`)
-- **fix**(release): handle missing tags in changelog generation (`374df5b`)
-- **chore**(release): add automated changelog generation to release workflow (`4d03d0f`)
--  Update: Enhance project import functionality (`1903aab`)
--  Cleanup: Optimize speaker import asset management (`38ff7be`)
--  Feature: Add venue asset tracking to prevent accidental cleanup (`c48fa90`)
--  Refactor: Consolidate properties into FileProperties class (`1e76833`)
--  Add scaling functionality to venue loading operator (`09cd9bd`)
--  Add FEATURES_IDEAS.md for tracking future enhancements (`6d8c14e`)
-- 🚀 Release: v1.1.2-beta - Collection management and UI improvements (`05454f1`)
-- ✨ Enhancement: Improve project import functionality and panel UI (`103ed39`)
-- 📝 Feature: Add project_name property for Holophonix project metadata (`bbffd57`)
-- ✨ Enhancement: Update panel icons for better visual consistency (`2fb29de`)
-- 🎯 Feature: Add collection management system for speakers and tracks (`df50b0b`)
-- 🐛 fix: Update class references in __init__.py (`af447b2`)
-- ♻️ refactor: Update terminology from 'sources' to 'tracks' (`f29ad9e`)
-- ✨ Complete code reorganization and improvements - Created dedicated property files (file, handler, icon) - Implemented centralized registration system - Fixed NodeOSCPreferences folder attribute issue - Added comprehensive documentation - Improved code quality with type hints and error handling (`fa52f9a`)
-- 🎨 Organize properties into dedicated files - Created file_properties.py for project-related properties - Created handler_properties.py for OSC handler configurations - Created icon_utils.py for icon management - Cleaned up property_utils.py to remove redundant code (`2047e54`)
+
+## v1.1.2-beta (Current Version)
+
+### Features
+- Implement default .hol file selection from manifest
+- Add venue asset tracking to prevent accidental cleanup
+- Add scaling functionality to venue loading operator
+- Add project_name property for Holophonix project metadata
+- Add collection management system for speakers and tracks
+
+### Improvements
+- Enhance speaker-related operators with improved import and add functionality
+- Update panel icons for better visual consistency
+- Improve project import functionality and panel UI
+
+### Bug Fixes
+- Update class references in __init__.py
+- Fix NodeOSCPreferences folder attribute issue
+
+### Refactoring
+- Update terminology from 'sources' to 'tracks'
+- Consolidate properties into FileProperties class
+- Organize properties into dedicated files:
+  - file_properties.py for project-related properties
+  - handler_properties.py for OSC handler configurations
+  - icon_utils.py for icon management
+
+## v1.1.1-beta
+- Initial release with collection management and UI improvements
