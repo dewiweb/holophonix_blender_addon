@@ -109,13 +109,36 @@ jobs:
       id: changelog
       run: |
         # Get all commits since previous tag, excluding merge commits
-        CHANGELOG=$(git log --oneline --no-merges $PREVIOUS_TAG..HEAD)
+        CHANGES=$(git log --format='%s' --no-merges $PREVIOUS_TAG..HEAD)
+        
+        # Initialize changelog sections
+        FEATURES=""
+        FIXES=""
+        BREAKING=""
+        
+        # Process each commit
+        while IFS= read -r commit; do
+          case "$commit" in
+            feat:*) FEATURES+="- ${commit#feat: }\n" ;;
+            fix:*) FIXES+="- ${commit#fix: }\n" ;;
+            breaking:*) BREAKING+="- ${commit#breaking: }\n" ;;
+          esac
+        done <<< "$CHANGES"
+        
+        # Build final changelog
+        CHANGELOG=""
+        if [ -n "$BREAKING" ]; then
+          CHANGELOG+="\n### Breaking Changes\n$BREAKING"
+        fi
+        if [ -n "$FEATURES" ]; then
+          CHANGELOG+="\n### New Features\n$FEATURES"
+        fi
+        if [ -n "$FIXES" ]; then
+          CHANGELOG+="\n### Bug Fixes\n$FIXES"
+        fi
         
         if [ -z "$CHANGELOG" ]; then
           CHANGELOG="- No significant changes"
-        else
-          # Format the changelog with bullet points
-          CHANGELOG=$(echo "$CHANGELOG" | sed 's/^/- /')
         fi
         
         echo "Generated changelog:"
