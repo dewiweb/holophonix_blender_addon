@@ -120,14 +120,34 @@ jobs:
         
         # Process each commit
         while IFS= read -r commit; do
+          # Trim leading/trailing spaces
+          commit=$(echo "$commit" | xargs)
+          
+          # Extract emoji if present
+          emoji=""
+          if [[ $commit =~ ^[[:space:]]*([[:graph:]]+) ]]; then
+            emoji=${BASH_REMATCH[1]}
+          fi
+          
+          # Process based on commit type
           case "$commit" in
-            feat:*|✨*|Feature:*|🎯*) FEATURES+="- ${commit#*: }\n" ;;
-            fix:*|🐛*|Fix:*) FIXES+="- ${commit#*: }\n" ;;
-            breaking:*|💥*) BREAKING+="- ${commit#*: }\n" ;;
-            refactor:*|♻️*) REFACTORING+="- ${commit#*: }\n" ;;
-            *improve*|*enhance*|*update*|🎨*) IMPROVEMENTS+="- $commit\n" ;;
+            feat:*|✨*|Feature:*|🎯*|*feature*) FEATURES+="- ${commit#*: }\n" ;;
+            fix:*|🐛*|Fix:*|*bugfix*|*fix*) FIXES+="- ${commit#*: }\n" ;;
+            breaking:*|💥*|*breaking*) BREAKING+="- ${commit#*: }\n" ;;
+            refactor:*|♻️*|*refactor*) REFACTORING+="- ${commit#*: }\n" ;;
+            *improve*|*enhance*|*update*|🎨*|*optimize*) IMPROVEMENTS+="- $commit\n" ;;
             *) if [[ ! $commit =~ ^(chore|docs|test|ci|build|style) ]]; then
-                 IMPROVEMENTS+="- $commit\n"
+                 if [[ $emoji =~ (✨|🎯|🎨|♻️|🐛|💥) ]]; then
+                   case $emoji in
+                     ✨|🎯) FEATURES+="- $commit\n" ;;
+                     🐛) FIXES+="- $commit\n" ;;
+                     💥) BREAKING+="- $commit\n" ;;
+                     ♻️) REFACTORING+="- $commit\n" ;;
+                     🎨) IMPROVEMENTS+="- $commit\n" ;;
+                   esac
+                 else
+                   IMPROVEMENTS+="- $commit\n"
+                 fi
                fi ;;
           esac
         done <<< "$CHANGES"
