@@ -47,18 +47,24 @@ jobs:
 
     - name: Get previous tag
       id: previous_tag
-      run: echo "PREVIOUS_TAG=$(git describe --tags --abbrev=0 $(git rev-list --tags --skip=1 --max-count=1))" >> $GITHUB_OUTPUT
+      run: |
+        CURRENT_VERSION=${{ steps.version.outputs.version }}
+        PREVIOUS_TAG=$(git tag -l "v*" --sort=-version:refname | grep -v "$CURRENT_VERSION" | head -n 1)
+        echo "PREVIOUS_TAG=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
 
     - name: Generate changelog
+      id: changelog
       run: |
-        echo "# Changelog" > CHANGELOG.md
-        echo "## Changes since ${{ steps.previous_tag.outputs.PREVIOUS_TAG }}" >> CHANGELOG.md
-        git log ${{ steps.previous_tag.outputs.PREVIOUS_TAG }}..HEAD --pretty=format:'- **%h** %s (by %an)' >> CHANGELOG.md
-
-    - name: Debug Changelog
-      run: |
-        echo "Contents of CHANGELOG.md:"
-        cat CHANGELOG.md
+        set -e
+        CHANGELOG=$(git log ${{ steps.previous_tag.outputs.PREVIOUS_TAG }}..HEAD --pretty=format:'- **%h** %s (by %an)')
+        if [ -z "$CHANGELOG" ]; then
+          echo "No changes found since ${{ steps.previous_tag.outputs.PREVIOUS_TAG }}"
+          echo "CHANGELOG=No changes found" >> $GITHUB_OUTPUT
+        else
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        fi
 
     - name: Validate Changelog
       id: validate_changelog
@@ -68,7 +74,7 @@ jobs:
           exit 1
         fi
       env:
-        CHANGELOG: ${{ steps.changelog.outputs.changelog }}
+        CHANGELOG: ${{ steps.changelog.outputs.CHANGELOG }}
 
     - name: Check version and tags
       id: version_check
@@ -121,11 +127,13 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v${{ steps.version.outputs.version }}-${{ steps.release_type.outputs.type }}
-        release_name: Release v${{ steps.version.outputs.version }} ${{ steps.release_type.outputs.type }}
+        tag_name: v${{ steps.version.outputs.version }}
+        release_name: Version ${{ steps.version.outputs.version }}
+        body: |
+          Changes since ${{ steps.previous_tag.outputs.PREVIOUS_TAG }}:
+          ${{ steps.changelog.outputs.CHANGELOG }}
         draft: false
         prerelease: ${{ steps.release_type.outputs.type == 'beta' }}
-        body_path: CHANGELOG.md
 
     - name: Upload Release Asset
       if: steps.version_check.outputs.release == 'true'
