@@ -42,15 +42,12 @@ jobs:
       env:
         VERSION: ${{ steps.version.outputs.version }}
 
-    - name: Fetch all tags
-      run: git fetch --tags
-
-    - name: Get previous tag
-      id: previous_tag
+    - name: Get previous version from latest tag
+      id: previous_version
       run: |
-        CURRENT_VERSION=${{ steps.version.outputs.version }}
-        PREVIOUS_TAG=$(git tag -l "v*" --sort=-version:refname | grep -v "$CURRENT_VERSION" | head -n 1)
-        echo "PREVIOUS_TAG=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
+        PREVIOUS_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+        echo "Previous version: $PREVIOUS_VERSION"
+        echo "previous_version=$PREVIOUS_VERSION" >> $GITHUB_OUTPUT
 
     - name: Check version and tags
       id: version_check
@@ -103,8 +100,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v${{ steps.version.outputs.version }}
-        release_name: Version ${{ steps.version.outputs.version }}
+        tag_name: v${{ steps.version.outputs.version }}-${{ steps.release_type.outputs.type }}
+        release_name: Release v${{ steps.version.outputs.version }} ${{ steps.release_type.outputs.type }}
         draft: false
         prerelease: ${{ steps.release_type.outputs.type == 'beta' }}
 
