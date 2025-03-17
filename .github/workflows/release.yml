@@ -108,77 +108,32 @@ jobs:
     - name: Generate Changelog
       id: changelog
       run: |
-        # Get all commits since previous tag, excluding merge commits
-        CHANGES=$(git log --format='%s' --no-merges $PREVIOUS_TAG..HEAD)
+        VERSION=$(grep -oP '(?<="version" : \()[^)]+' holophonix_utils/__init__.py | tr -d " " | tr , .)
+        ALL_TAGS=$(git tag -l "v*" --sort=-version:refname)
+        PREVIOUS_TAG=$(echo "$ALL_TAGS" | grep -v "v$VERSION" | head -n 1)
         
-        # Initialize changelog sections
-        FEATURES=""
-        FIXES=""
-        BREAKING=""
-        IMPROVEMENTS=""
-        REFACTORING=""
-        
-        # Process each commit
-        while IFS= read -r commit; do
-          # Trim leading/trailing spaces and normalize case
-          commit=$(echo "$commit" | xargs | tr '[:upper:]' '[:lower:]')
-          
-          # Extract emoji if present
-          emoji=""
-          if [[ $commit =~ ^[[:space:]]*([[:graph:]]+) ]]; then
-            emoji=${BASH_REMATCH[1]}
-          fi
-          
-          # Process based on commit type
-          case "$commit" in
-            feat:*|✨*|feature:*|🎯*|*feature*) FEATURES+="- ${commit#*: }\n" ;;
-            fix:*|🐛*|fix:*|*bugfix*|*fix*) FIXES+="- ${commit#*: }\n" ;;
-            breaking:*|💥*|*breaking*) BREAKING+="- ${commit#*: }\n" ;;
-            refactor:*|♻️*|*refactor*) REFACTORING+="- ${commit#*: }\n" ;;
-            *improve*|*enhance*|*update*|🎨*|*optimize*) IMPROVEMENTS+="- $commit\n" ;;
-            *) if [[ ! $commit =~ ^(chore|docs|test|ci|build|style) ]]; then
-                 if [[ $emoji =~ (✨|🎯|🎨|♻️|🐛|💥) ]]; then
-                   case $emoji in
-                     ✨|🎯) FEATURES+="- $commit\n" ;;
-                     🐛) FIXES+="- $commit\n" ;;
-                     💥) BREAKING+="- $commit\n" ;;
-                     ♻️) REFACTORING+="- $commit\n" ;;
-                     🎨) IMPROVEMENTS+="- $commit\n" ;;
-                   esac
-                 else
-                   IMPROVEMENTS+="- $commit\n"
-                 fi
-               fi ;;
-          esac
-        done <<< "$CHANGES"
-        
-        # Build final changelog
-        CHANGELOG=""
-        if [ -n "$BREAKING" ]; then
-          CHANGELOG+="\n### Breaking Changes\n$BREAKING"
-        fi
-        if [ -n "$FEATURES" ]; then
-          CHANGELOG+="\n### New Features\n$FEATURES"
-        fi
-        if [ -n "$FIXES" ]; then
-          CHANGELOG+="\n### Bug Fixes\n$FIXES"
-        fi
-        if [ -n "$IMPROVEMENTS" ]; then
-          CHANGELOG+="\n### Improvements\n$IMPROVEMENTS"
-        fi
-        if [ -n "$REFACTORING" ]; then
-          CHANGELOG+="\n### Refactoring\n$REFACTORING"
+        if [ -z "$PREVIOUS_TAG" ]; then
+          echo "No previous tag found, using initial commit"
+          PREVIOUS_TAG=$(git rev-list --max-parents=0 HEAD)
         fi
         
-        if [ -z "$CHANGELOG" ]; then
-          CHANGELOG="- No significant changes"
-        fi
+        echo "# Changelog" > CHANGELOG.md
+        echo "## Changes since $PREVIOUS_TAG" >> CHANGELOG.md
+        COMMITS=$(git log --oneline --no-merges $PREVIOUS_TAG..HEAD)
         
-        echo "Generated changelog:"
-        echo "$CHANGELOG"
-        echo "changelog=$CHANGELOG" >> $GITHUB_OUTPUT
-      env:
-        VERSION: ${{ steps.version.outputs.version }}
+        if [ -z "$COMMITS" ]; then
+          echo "- No significant changes" >> CHANGELOG.md
+        else
+          echo "$COMMITS" | while IFS= read -r commit; do
+            COMMIT_HASH=$(echo "$commit" | cut -d' ' -f1)
+            COMMIT_MESSAGE=$(echo "$commit" | cut -d' ' -f2-)
+            COMMIT_TYPE=$(echo "$COMMIT_MESSAGE" | grep -oP '^\w+')
+            if [ -n "$COMMIT_TYPE" ]; then
+              COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed "s/^$COMMIT_TYPE/**$COMMIT_TYPE**/")
+            fi
+            echo "- $COMMIT_MESSAGE (\`$COMMIT_HASH\`)" >> CHANGELOG.md
+          done
+        fi
 
     - name: Validate Changelog
       id: validate_changelog
@@ -214,9 +169,7 @@ jobs:
         release_name: Release v${{ steps.version.outputs.version }} ${{ steps.release_type.outputs.type }}
         draft: false
         prerelease: ${{ steps.release_type.outputs.type == 'beta' }}
-        body: |
-          Changelog:
-          ${{ steps.changelog.outputs.changelog }}
+        body_path: CHANGELOG.md
 
     - name: Upload Release Asset
       if: steps.version_check.outputs.release == 'true'
