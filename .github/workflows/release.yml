@@ -120,8 +120,8 @@ jobs:
         
         # Process each commit
         while IFS= read -r commit; do
-          # Trim leading/trailing spaces
-          commit=$(echo "$commit" | xargs)
+          # Trim leading/trailing spaces and normalize case
+          commit=$(echo "$commit" | xargs | tr '[:upper:]' '[:lower:]')
           
           # Extract emoji if present
           emoji=""
@@ -131,8 +131,8 @@ jobs:
           
           # Process based on commit type
           case "$commit" in
-            feat:*|✨*|Feature:*|🎯*|*feature*) FEATURES+="- ${commit#*: }\n" ;;
-            fix:*|🐛*|Fix:*|*bugfix*|*fix*) FIXES+="- ${commit#*: }\n" ;;
+            feat:*|✨*|feature:*|🎯*|*feature*) FEATURES+="- ${commit#*: }\n" ;;
+            fix:*|🐛*|fix:*|*bugfix*|*fix*) FIXES+="- ${commit#*: }\n" ;;
             breaking:*|💥*|*breaking*) BREAKING+="- ${commit#*: }\n" ;;
             refactor:*|♻️*|*refactor*) REFACTORING+="- ${commit#*: }\n" ;;
             *improve*|*enhance*|*update*|🎨*|*optimize*) IMPROVEMENTS+="- $commit\n" ;;
