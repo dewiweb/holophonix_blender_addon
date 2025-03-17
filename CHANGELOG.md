@@ -1,55 +1,55 @@
 # Changelog
 
-## [1.0.5] - 2025-03-12
-### Added
-- Speaker import functionality
-- .hol file selection operator
-- Improved venue loading operations
-- Enhanced project import functionality
+## v1.2.0-stable (Current Version)
 
-### Changed
-- Updated property utilities
-- Updated core registration system
+### Features
+- Implement default .hol file selection from manifest
+- Add venue asset tracking to prevent accidental cleanup
+- Add scaling functionality to venue loading operator
+- Add project_name property for Holophonix project metadata
+- Add collection management system for speakers and tracks
 
-## [1.0.4] - 2025-03-12
-### Added
-- Beta release workflow support
-- New export handler operator for track position, color, and name management
+### Improvements
+- Enhance speaker-related operators with improved import and add functionality
+- Update panel icons for better visual consistency
+- Improve project import functionality and panel UI
 
-### Changed
-- Improved property management utilities
-- Enhanced UI panels with new features
+### Bug Fixes
+- Update class references in __init__.py
+- Fix NodeOSCPreferences folder attribute issue
 
-## [1.0.3] - 2025-03-11
-### Added
-- Holophonix project import system with zip archive support
-- Custom panel icons and default states
-- Feature planning documentation
+### Refactoring
+- Update terminology from 'sources' to 'tracks'
+- Consolidate properties into FileProperties class
+- Organize properties into dedicated files:
+  - file_properties.py for project-related properties
+  - handler_properties.py for OSC handler configurations
+  - icon_utils.py for icon management
 
-### Fixed
-- Model append error handling
-- GLB import fallback mechanism
+## v1.1.2-beta
+### Features
+- Implement default .hol file selection from manifest
+- Add venue asset tracking to prevent accidental cleanup
+- Add scaling functionality to venue loading operator
+- Add project_name property for Holophonix project metadata
+- Add collection management system for speakers and tracks
 
-## [1.0.2] - 2025-03-08
-### Added
-- Automated release workflow implementation
+### Improvements
+- Enhance speaker-related operators with improved import and add functionality
+- Update panel icons for better visual consistency
+- Improve project import functionality and panel UI
 
-### Fixed
-- Version comparison logic in workflow
-- Workflow path and zip commands
-- YAML syntax in workflow
+### Bug Fixes
+- Update class references in __init__.py
+- Fix NodeOSCPreferences folder attribute issue
 
-## [1.0.1] - 2025-03-08
-### Added
-- Initial release workflow setup
+### Refactoring
+- Update terminology from 'sources' to 'tracks'
+- Consolidate properties into FileProperties class
+- Organize properties into dedicated files:
+  - file_properties.py for project-related properties
+  - handler_properties.py for OSC handler configurations
+  - icon_utils.py for icon management
 
-### Fixed
-- Version extraction and formatting
-- Workflow permissions and triggers
-
-## [1.0.0] - 2025-03-08
-### Added
-- Initial project structure
-- Core functionality implementation
-- Basic UI panels
-- Documentation and README
+## v1.1.1-beta
+- Initial release with collection management and UI improvements

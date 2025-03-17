@@ -17,7 +17,7 @@ class SNA_PT_SPEAKERS_F8536(bpy.types.Panel):
 
     def draw_header(self, context):
         layout = self.layout
-        layout.label(icon='OUTLINER_OB_SPEAKER')
+        layout.label(icon='MESH_CUBE')
 
     def draw(self, context):
         layout = self.layout

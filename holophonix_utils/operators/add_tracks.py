@@ -4,10 +4,11 @@ import os
 import json
 import numpy
 from math import radians
+from ..utils.math_utils import cart2sph, sph2cart
 
-class SNA_OT_Add_Sources_73B0D(bpy.types.Operator, ImportHelper):
-    bl_idname = "sna.add_sources_73b0d"
-    bl_label = "Add_Sources"
+class SNA_OT_Add_Tracks_73B0D(bpy.types.Operator, ImportHelper):
+    bl_idname = "sna.add_tracks_73b0d"
+    bl_label = "Add Tracks"
     bl_description = "replace actual tracks by those in imported hol preset file"
     bl_options = {"REGISTER", "UNDO"}
     filter_glob: bpy.props.StringProperty( default='*.hol', options={'HIDDEN'} )
@@ -23,66 +24,40 @@ class SNA_OT_Add_Sources_73B0D(bpy.types.Operator, ImportHelper):
         import json
         import numpy
 
-        def cart2sph(z, y, x):
-            """Convert from cartesian coordinates (x,y,z) to spherical (elevation,
-            azimuth, radius). Output is in degrees.
-            usage:
-                array3xN[el,az,rad] = cart2sph(array3xN[x,y,z])
-                OR
-                elevation, azimuth, radius = cart2sph(x,y,z)
-                If working in DKL space, z = Luminance, y = S and x = LM
-            """
-            width = len(z)
-            elevation = numpy.empty([width, width])
-            radius = numpy.empty([width, width])
-            azimuth = numpy.empty([width, width])
-            radius = numpy.sqrt(x**2 + y**2 + z**2)
-            azimuth = numpy.arctan2(y, x)
-            # Calculating the elevation from x,y up
-            elevation = numpy.arctan2(z, numpy.sqrt(x**2 + y**2))
-            # convert azimuth and elevation angles into degrees
-            azimuth *= 180.0 / numpy.pi
-            elevation *= 180.0 / numpy.pi
-            sphere = numpy.array([elevation, azimuth, radius])
-            sphere = numpy.rollaxis(sphere, 0, 3)
-            return sphere
+        # Create or get Tracks collection
+        tracks_collection = bpy.data.collections.get('Tracks')
+        if not tracks_collection:
+            tracks_collection = bpy.data.collections.new('Tracks')
+            bpy.context.scene.collection.children.link(tracks_collection)
 
-        def sph2cart(*args):
-            """Convert from spherical coordinates (elevation, azimuth, radius)
-            to cartesian (x,y,z).
-            usage:
-                array3xN[x,y,z] = sph2cart(array3xN[el,az,rad])
-                OR
-                x,y,z = sph2cart(elev, azim, radius)
-            """
-            if len(args) == 1:  # received an Nx3 array
-                elev = args[0][0, :]
-                azim = args[0][1, :]
-                radius = args[0][2, :]
-                returnAsArray = True
-            elif len(args) == 3:
-                elev = args[0]
-                azim = args[1]
-                radius = args[2]
-                returnAsArray = False
-            z = radius * numpy.sin(radians(elev))
-            x = radius * numpy.cos(radians(elev)) * numpy.cos(radians(azim))
-            y = radius * numpy.cos(radians(elev)) * numpy.sin(radians(azim))
-            if returnAsArray:
-                return numpy.asarray([y, x, z])
-            else:
-                return y, x, z
+        # Clear existing tracks
+        track_meshes = set()
+        track_materials = set()
+        tracks_to_delete = []
+
+        # Find all track objects
         for obj in bpy.context.scene.objects:
             if "track" in obj.name:
-                bpy.data.objects[obj.name].select_set(True)
-                print(obj.name, ' deleted')
-                bpy.ops.object.delete()
-        for block in bpy.data.meshes:
-            if block.users == 0:
-                bpy.data.meshes.remove(block)
-        for block in bpy.data.materials:
-            if block.users == 0:
-                bpy.data.materials.remove(block)
+                # Collect used meshes and materials
+                if obj.data:
+                    track_meshes.add(obj.data.name)
+                for mat_slot in obj.material_slots:
+                    if mat_slot.material:
+                        track_materials.add(mat_slot.material.name)
+                tracks_to_delete.append(obj)
+
+        # Delete track objects directly
+        for obj in tracks_to_delete:
+            bpy.data.objects.remove(obj, do_unlink=True)
+
+        # Clean up track meshes and materials
+        for mesh_name in track_meshes:
+            if mesh_name in bpy.data.meshes:
+                bpy.data.meshes.remove(bpy.data.meshes[mesh_name])
+        for mat_name in track_materials:
+            if mat_name in bpy.data.materials:
+                bpy.data.materials.remove(bpy.data.materials[mat_name])
+
         with open(preset_file_path) as f:
                 hol_file_content = json.load(f)
                 audio_engine_dict = hol_file_content['ae']
@@ -143,7 +118,7 @@ class SNA_OT_Add_Sources_73B0D(bpy.types.Operator, ImportHelper):
                     if dist_path != []:
                         dist_path = dist_path[0].split()
                         trk_sph_coord[2] = float(dist_path[1])
-                        trk_cart_coord = sph2cart(float(trk_sph_coord[1]),float(trk_sph_coord[0]),float(trk_sph_coord[2]))
+                        trk_cart_coord = sph2cart(trk_sph_coord[1], trk_sph_coord[0], trk_sph_coord[2])
                         print(i,"j'ai une dist",dist_path)
                 elif param == params[5]:
                     name_path = [path for path in audio_engine_dict if tuple in path]
@@ -171,6 +146,12 @@ class SNA_OT_Add_Sources_73B0D(bpy.types.Operator, ImportHelper):
                         continue
                     print(i,'track',trk_number,'created as',trk_name)
                     for trk in bpy.context.selected_objects:
+                        # Unlink from all collections
+                        for col in trk.users_collection:
+                            col.objects.unlink(trk)
+                        # Link to Tracks collection
+                        tracks_collection.objects.link(trk)
+
                         trk.name = track +"."+ trk_number +"."+ trk_name
                         trk.name = (trk.name).replace('/','')
                         trk.data.name = trk.name

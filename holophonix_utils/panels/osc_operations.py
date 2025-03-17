@@ -33,14 +33,14 @@ class SNA_PT_NodeOSC_Operations(bpy.types.Panel):
 
             # Add export holo objects button
             try:
-                op = layout.operator('sna.sources_exporter_34f69', 
+                op = layout.operator('sna.tracks_exporter_34f69', 
                                    text='Export Holo objects to OSC handlers', 
                                    icon_value=context.window_manager.custom_icons['logo_icon'].icon_id, 
                                    emboss=True, 
                                    depress=False)
             except Exception as e:
-                logger.error(f'Error creating sources exporter operator: {str(e)}')
-                layout.label(text='Error creating sources exporter operator', icon='ERROR')
+                logger.error(f'Error creating tracks exporter operator: {str(e)}')
+                layout.label(text='Error creating tracks exporter operator', icon='ERROR')
 
         except Exception as e:
             logger.error(f'Error drawing NodeOSC operations panel: {str(e)}')

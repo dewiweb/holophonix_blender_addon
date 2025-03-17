@@ -5,6 +5,7 @@ import json
 import math
 from numpy import radians
 import numpy
+from ..utils.math_utils import cart2sph, sph2cart
 
 class SNA_OT_Add_Speakers_994C8(bpy.types.Operator, ImportHelper):
     bl_idname = "sna.add_speakers_994c8"
@@ -18,66 +19,49 @@ class SNA_OT_Add_Speakers_994C8(bpy.types.Operator, ImportHelper):
         return not False
 
     def execute(self, context):
-        preset_file_path = self.filepath
-        file_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'amadeus.blend')
-        Variable = None
+        # Create or get Speakers collection
+        if 'Speakers' not in bpy.data.collections:
+            speakers_collection = bpy.data.collections.new('Speakers')
+            bpy.context.scene.collection.children.link(speakers_collection)
+        else:
+            speakers_collection = bpy.data.collections['Speakers']
 
-        def cart2sph(z, y, x):
-            """Convert from cartesian coordinates (x,y,z) to spherical (elevation,
-            azimuth, radius). Output is in degrees.
-            usage:
-                array3xN[el,az,rad] = cart2sph(array3xN[x,y,z])
-                OR
-                elevation, azimuth, radius = cart2sph(x,y,z)
-                If working in DKL space, z = Luminance, y = S and x = LM
-            """
-            width = len(z)
-            elevation = numpy.empty([width, width])
-            radius = numpy.empty([width, width])
-            azimuth = numpy.empty([width, width])
-            radius = numpy.sqrt(x**2 + y**2 + z**2)
-            azimuth = numpy.arctan2(y, x)
-            # Calculating the elevation from x,y up
-            elevation = numpy.arctan2(z, numpy.sqrt(x**2 + y**2))
-            # convert azimuth and elevation angles into degrees
-            azimuth *= 180.0 / numpy.pi
-            elevation *= 180.0 / numpy.pi
-            sphere = numpy.array([elevation, azimuth, radius])
-            sphere = numpy.rollaxis(sphere, 0, 3)
-            return sphere
+        # Track used meshes and materials
+        speaker_meshes = set()
+        speaker_materials = set()
+        speakers_to_delete = []
 
-        def sph2cart(*args):
-            """Convert from spherical coordinates (elevation, azimuth, radius)
-            to cartesian (x,y,z).
-            usage:
-                array3xN[x,y,z] = sph2cart(array3xN[el,az,rad])
-                OR
-                x,y,z = sph2cart(elev, azim, radius)
-            """
-            if len(args) == 1:  # received an Nx3 array
-                elev = args[0][0, :]
-                azim = args[0][1, :]
-                radius = args[0][2, :]
-                returnAsArray = True
-            elif len(args) == 3:
-                elev = args[0]
-                azim = args[1]
-                radius = args[2]
-                returnAsArray = False
-            z = radius * numpy.sin(radians(elev))
-            x = radius * numpy.cos(radians(elev)) * numpy.cos(radians(azim))
-            y = radius * numpy.cos(radians(elev)) * numpy.sin(radians(azim))
-            if returnAsArray:
-                return numpy.asarray([x, y, z])
-            else:
-                return y, x, z
+        # Find all speaker objects
+        for obj in bpy.context.scene.objects:
+            if "speaker" in obj.name:
+                # Collect used meshes and materials
+                if obj.data:
+                    speaker_meshes.add(obj.data.name)
+                for mat_slot in obj.material_slots:
+                    if mat_slot.material:
+                        speaker_materials.add(mat_slot.material.name)
+                speakers_to_delete.append(obj)
+
+        # Delete speaker objects directly
+        for obj in speakers_to_delete:
+            bpy.data.objects.remove(obj, do_unlink=True)
+
+        # Clean up speaker meshes and materials
+        for mesh_name in speaker_meshes:
+            if mesh_name in bpy.data.meshes:
+                bpy.data.meshes.remove(bpy.data.meshes[mesh_name])
+        for mat_name in speaker_materials:
+            if mat_name in bpy.data.materials:
+                bpy.data.materials.remove(bpy.data.materials[mat_name])
+
+        # Clean up existing speakers in Speakers collection
+        for obj in speakers_collection.objects:
+            bpy.data.objects[obj.name].select_set(True)
+            print(obj.name, ' deleted')
+            bpy.ops.object.delete()
 
         for obj in bpy.context.scene.objects:
             if "Empty" in obj.name:
-                bpy.data.objects[obj.name].select_set(True)
-                print(obj.name, ' deleted')
-                bpy.ops.object.delete()
-            elif "speaker" in obj.name:
                 bpy.data.objects[obj.name].select_set(True)
                 print(obj.name, ' deleted')
                 bpy.ops.object.delete()
@@ -89,6 +73,10 @@ class SNA_OT_Add_Speakers_994C8(bpy.types.Operator, ImportHelper):
                 bpy.data.materials.remove(block)
 
         bpy.ops.object.empty_add(type='PLAIN_AXES')
+
+        preset_file_path = self.filepath
+        file_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'amadeus.blend')
+        Variable = None
 
         with open(preset_file_path) as f:
             preset_content = json.load(f)
@@ -147,7 +135,7 @@ class SNA_OT_Add_Speakers_994C8(bpy.types.Operator, ImportHelper):
                             p_tuple = hol_dict[tuple]
                             spk_dist = p_tuple[0]
                             spk_sph_coord[2] = float(spk_dist)
-                            spk_cart_coord = sph2cart(float(spk_sph_coord[1]),float(spk_sph_coord[0]),float(spk_sph_coord[2]))
+                            spk_cart_coord = sph2cart(float(spk_sph_coord[1]), float(spk_sph_coord[0]), float(spk_sph_coord[2]))
                     elif param == params[4]:
                         if tuple in hol_keys:
                             p_tuple = hol_dict[tuple]
@@ -176,11 +164,17 @@ class SNA_OT_Add_Speakers_994C8(bpy.types.Operator, ImportHelper):
                     filename=spk_glb
                     )
                 for spk in bpy.context.selected_objects:
-                    spk.name = speaker +"."+ spk_number +"."+ spk_glb
+                    spk.name = speaker +'.'+ spk_number +'.'+ spk_glb
                     spk.name = (spk.name).replace('/','')
                     spk.data.name = spk.name
                     for k in range(0,3):
                         spk.location[k] = spk_cart_coord[k]
+
+                    # Remove from any existing collections and add to Speakers collection
+                    for col in spk.users_collection:
+                        col.objects.unlink(spk)
+                    speakers_collection.objects.link(spk)
+
                     spk_material = bpy.data.materials.new(name = spk.name+'.mat')
                     spk.data.materials.clear()
                     spk.data.materials.append(spk_material)

@@ -3,6 +3,8 @@ import os
 import json
 import numpy
 from math import radians
+from ..utils.math_utils import sph2cart
+from ..utils.file_properties import FileProperties
 
 class SNA_OT_Import_Tracks(bpy.types.Operator):
     bl_idname = 'sna.import_tracks'
@@ -10,7 +12,7 @@ class SNA_OT_Import_Tracks(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        props = context.scene.holophonix_utils
+        props = context.scene.file_properties
         print(f"Selected .hol file: {props.holophonix_hol_files}")  # Debug print
         
         if not props.holophonix_hol_files or not props.project_path:
@@ -25,38 +27,39 @@ class SNA_OT_Import_Tracks(bpy.types.Operator):
 
         file_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'amadeus.blend')
 
-        def sph2cart(*args):
-            if len(args) == 1:
-                elev = args[0][0, :]
-                azim = args[0][1, :]
-                radius = args[0][2, :]
-                returnAsArray = True
-            elif len(args) == 3:
-                elev = args[0]
-                azim = args[1]
-                radius = args[2]
-                returnAsArray = False
-            z = radius * numpy.sin(radians(elev))
-            x = radius * numpy.cos(radians(elev)) * numpy.cos(radians(azim))
-            y = radius * numpy.cos(radians(elev)) * numpy.sin(radians(azim))
-            if returnAsArray:
-                return numpy.asarray([y, x, z])
-            else:
-                return y, x, z
+        # Create or get Tracks collection
+        tracks_collection = bpy.data.collections.get('Tracks')
+        if not tracks_collection:
+            tracks_collection = bpy.data.collections.new('Tracks')
+            bpy.context.scene.collection.children.link(tracks_collection)
 
-        # Clean up existing tracks
+        # Track used meshes and materials
+        track_meshes = set()
+        track_materials = set()
+        tracks_to_delete = []
+
+        # Find all track objects
         for obj in bpy.context.scene.objects:
             if "track" in obj.name:
-                bpy.data.objects[obj.name].select_set(True)
-                bpy.ops.object.delete()
+                # Collect used meshes and materials
+                if obj.data:
+                    track_meshes.add(obj.data.name)
+                for mat_slot in obj.material_slots:
+                    if mat_slot.material:
+                        track_materials.add(mat_slot.material.name)
+                tracks_to_delete.append(obj)
 
-        # Clean up unused meshes and materials
-        for block in bpy.data.meshes:
-            if block.users == 0:
-                bpy.data.meshes.remove(block)
-        for block in bpy.data.materials:
-            if block.users == 0:
-                bpy.data.materials.remove(block)
+        # Delete track objects directly
+        for obj in tracks_to_delete:
+            bpy.data.objects.remove(obj, do_unlink=True)
+
+        # Clean up track meshes and materials
+        for mesh_name in track_meshes:
+            if mesh_name in bpy.data.meshes:
+                bpy.data.meshes.remove(bpy.data.meshes[mesh_name])
+        for mat_name in track_materials:
+            if mat_name in bpy.data.materials:
+                bpy.data.materials.remove(bpy.data.materials[mat_name])
 
         with open(preset_file_path) as f:
             hol_file_content = json.load(f)
@@ -116,6 +119,12 @@ class SNA_OT_Import_Tracks(bpy.types.Operator):
                     )
                     if result == {'FINISHED'}:
                         for trk in bpy.context.selected_objects:
+                            # Unlink from all collections
+                            for col in trk.users_collection:
+                                col.objects.unlink(trk)
+                            # Link to Tracks collection
+                            tracks_collection.objects.link(trk)
+
                             trk.name = track + "." + trk_number + "." + trk_name
                             trk.name = trk.name.replace('/', '')
                             trk.data.name = trk.name

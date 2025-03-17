@@ -3,6 +3,8 @@ import os
 import zipfile
 import tempfile
 import shutil
+import json
+from ..utils.file_properties import FileProperties
 
 class SNA_OT_Import_Holophonix_Project(bpy.types.Operator):
     bl_idname = "sna.import_holophonix_project"
@@ -29,6 +31,12 @@ class SNA_OT_Import_Holophonix_Project(bpy.types.Operator):
             master_folder = None
             for root, dirs, files in os.walk(temp_dir):
                 if 'manifest.json' in files and 'Venue' in dirs:
+                    FileProperties.manifest_path = os.path.join(root, 'manifest.json')
+                    with open(FileProperties.manifest_path, 'r') as f:
+                        manifest = json.load(f)
+                        if 'defaultPreset' in manifest:
+                            FileProperties.default_hol_file = manifest['defaultPreset']+'.hol'
+                            print(f"Default preset: {FileProperties.default_hol_file}")
                     # Check if 'Presets' is nested one level inside
                     presets_path = os.path.join(root, 'Presets')
                     if os.path.exists(presets_path):
@@ -39,16 +47,34 @@ class SNA_OT_Import_Holophonix_Project(bpy.types.Operator):
                 self.report({'ERROR'}, 'No valid Holophonix project found in the .zip file')
                 return {'CANCELLED'}
 
-            # Copy the master folder to a permanent location
-            project_folder = os.path.join(os.path.dirname(self.filepath), os.path.basename(master_folder))
-            shutil.copytree(master_folder, project_folder, dirs_exist_ok=True)
+            # Determine destination folder
+            temp_files_path = bpy.context.preferences.filepaths.temporary_directory
+            if temp_files_path and os.path.exists(temp_files_path):
+                project_folder = os.path.join(temp_files_path, os.path.basename(master_folder))
+            else:
+                # Fallback to Blender's datafiles directory
+                datafiles_path = bpy.utils.user_resource('DATAFILES')
+                holophonix_projects_path = os.path.join(datafiles_path, 'HolophonixProjects')
+                os.makedirs(holophonix_projects_path, exist_ok=True)
+                project_folder = os.path.join(holophonix_projects_path, os.path.basename(master_folder))
 
-            # Set the project path in HolophonixUtilsProperties
-            context.scene.holophonix_utils.project_path = project_folder
-            print(f"Project path set to: {project_folder}")
+            # Remove existing project folder if it exists
+            if os.path.exists(project_folder):
+                shutil.rmtree(project_folder)
 
-        self.report({'INFO'}, 'Project imported successfully!')
-        context.scene.holophonix_utils.project_imported = True
+            # Copy the master folder to destination
+            shutil.copytree(master_folder, project_folder)
+
+            # Extract project name from master folder
+            project_name = os.path.basename(master_folder)
+
+            # Set project path and name in FileProperties
+            context.scene.file_properties.project_path = project_folder
+            context.scene.file_properties.project_name = project_name
+            print(f"Project '{project_name}' imported successfully! Path: {project_folder}")
+
+            self.report({'INFO'}, f'Project "{project_name}" imported successfully!')
+        context.scene.file_properties.project_imported = True
         return {'FINISHED'}
 
     def invoke(self, context, event):

@@ -3,6 +3,8 @@ import os
 import json
 import numpy
 from math import radians
+from ..utils.math_utils import sph2cart
+from ..utils.file_properties import FileProperties
 
 class SNA_OT_Import_Speakers(bpy.types.Operator):
     bl_idname = 'sna.import_speakers'
@@ -10,7 +12,14 @@ class SNA_OT_Import_Speakers(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        props = context.scene.holophonix_utils
+        # Create or get Speakers collection
+        if 'Speakers' not in bpy.data.collections:
+            speakers_collection = bpy.data.collections.new('Speakers')
+            bpy.context.scene.collection.children.link(speakers_collection)
+        else:
+            speakers_collection = bpy.data.collections['Speakers']
+
+        props = context.scene.file_properties
         
         if not props.holophonix_hol_files or not props.project_path:
             self.report({'ERROR'}, 'No valid .hol file selected')
@@ -21,26 +30,41 @@ class SNA_OT_Import_Speakers(bpy.types.Operator):
             self.report({'ERROR'}, 'Selected .hol file does not exist')
             return {'CANCELLED'}
 
-        file_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'amadeus.blend')
+        # Only clean up after successful file validation
+        # Track used meshes and materials
+        speaker_meshes = set()
+        speaker_materials = set()
+        speakers_to_delete = []
 
-        # Clean up existing speakers
+        # Find all speaker objects
         for obj in bpy.context.scene.objects:
             if "speaker" in obj.name:
-                bpy.data.objects[obj.name].select_set(True)
-                bpy.ops.object.delete()
+                # Collect used meshes and materials
+                if obj.data:
+                    speaker_meshes.add(obj.data.name)
+                for mat_slot in obj.material_slots:
+                    if mat_slot.material:
+                        speaker_materials.add(mat_slot.material.name)
+                speakers_to_delete.append(obj)
 
-        # Clean up unused meshes and materials
-        for block in bpy.data.meshes:
-            if block.users == 0:
-                bpy.data.meshes.remove(block)
-        for block in bpy.data.materials:
-            if block.users == 0:
-                bpy.data.materials.remove(block)
+        # Delete speaker objects directly
+        for obj in speakers_to_delete:
+            bpy.data.objects.remove(obj, do_unlink=True)
+
+        # Clean up speaker meshes and materials
+        for mesh_name in speaker_meshes:
+            if mesh_name in bpy.data.meshes:
+                bpy.data.meshes.remove(bpy.data.meshes[mesh_name])
+        for mat_name in speaker_materials:
+            if mat_name in bpy.data.materials:
+                bpy.data.materials.remove(bpy.data.materials[mat_name])
 
         with open(preset_file_path) as f:
             hol_file_content = json.load(f)
             hol_dict = hol_file_content['hol']
             hol_keys = list(hol_dict.keys())
+
+            file_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'amadeus.blend')
 
             for i in range(1, 512):
                 spk_sph_coord = [0, 0, 0]
@@ -69,7 +93,7 @@ class SNA_OT_Import_Speakers(bpy.types.Operator):
                                 spk_sph_coord[1] = float(p_tuple[0])
                             elif param == '/dist':
                                 spk_sph_coord[2] = float(p_tuple[0])
-                                spk_cart_coord = self.sph2cart(float(spk_sph_coord[1]), float(spk_sph_coord[0]), float(spk_sph_coord[2]))
+                                spk_cart_coord = sph2cart(float(spk_sph_coord[1]), float(spk_sph_coord[0]), float(spk_sph_coord[2]))
                             elif param == '/view3D/file3D':
                                 end_loc = len(p_tuple)-5
                                 spk_glb = str(p_tuple[0])[18:end_loc]
@@ -91,11 +115,16 @@ class SNA_OT_Import_Speakers(bpy.types.Operator):
 
                     if result == {'FINISHED'}:
                         for spk in bpy.context.selected_objects:
-                            spk.name = speaker + str(i) + "." + spk_glb
+                            spk.name = speaker + str(i) + '.' + spk_glb
                             spk.name = spk.name.replace('/', '')
                             spk.data.name = spk.name
                             for k in range(0, 3):
                                 spk.location[k] = spk_cart_coord[k]
+
+                            # Remove from any existing collections and add to Speakers collection
+                            for col in spk.users_collection:
+                                col.objects.unlink(spk)
+                            speakers_collection.objects.link(spk)
 
                             spk_material = bpy.data.materials.new(name = spk.name+'.mat')
                             spk.data.materials.clear()
@@ -117,11 +146,13 @@ class SNA_OT_Import_Speakers(bpy.types.Operator):
                             else:
                                 tracking = spk.constraints.new(type='TRACK_TO')
 
+        # Clean up unused meshes and materials
+        for block in bpy.data.meshes:
+            if block.users == 0:
+                bpy.data.meshes.remove(block)
+        for block in bpy.data.materials:
+            if block.users == 0:
+                bpy.data.materials.remove(block)
+
         self.report({'INFO'}, 'Speakers imported successfully!')
         return {'FINISHED'}
-
-    def sph2cart(self, elev, azim, radius):
-        z = radius * numpy.sin(radians(elev))
-        x = radius * numpy.cos(radians(elev)) * numpy.cos(radians(azim))
-        y = radius * numpy.cos(radians(elev)) * numpy.sin(radians(azim))
-        return y, x, z
