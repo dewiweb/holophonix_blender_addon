@@ -125,7 +125,7 @@ jobs:
         
         echo "# Changelog" > CHANGELOG.md
         echo "## Changes since $PREVIOUS_TAG" >> CHANGELOG.md
-        COMMITS=$(git log --oneline --no-merges --first-parent $PREVIOUS_TAG..HEAD)
+        COMMITS=$(git log --oneline  $PREVIOUS_TAG..HEAD)
         if [ -z "$COMMITS" ]; then
           echo "- No significant changes" >> CHANGELOG.md
         else
