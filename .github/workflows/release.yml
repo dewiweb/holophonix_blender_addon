@@ -42,37 +42,31 @@ jobs:
       env:
         VERSION: ${{ steps.version.outputs.version }}
 
-    - name: Get Previous Version
-      id: previous_version
+    - name: Fetch all tags
+      run: git fetch --tags
+
+    - name: Get previous tag
+      id: previous_tag
+      run: echo "PREVIOUS_TAG=$(git describe --tags --abbrev=0 $(git rev-list --tags --skip=1 --max-count=1))" >> $GITHUB_OUTPUT
+
+    - name: Generate changelog
       run: |
-        set -e
-        
-        # Fetch all tags from remote
-        git fetch --tags
-        
-        # Get all version tags (including beta)
-        echo "Getting all version tags"
-        ALL_TAGS=$(git tag -l "v*" --sort=-version:refname)
-        
-        echo "All version tags found:"
-        echo "$ALL_TAGS"
-        
-        # Filter out current version tags (including beta)
-        PREVIOUS_TAG=$(echo "$ALL_TAGS" | grep -v "v$VERSION" | head -n 1)
-        
-        if [ -z "$PREVIOUS_TAG" ]; then
-          echo "No previous version tag found, using initial commit"
-          PREVIOUS_TAG=$(git rev-list --max-parents=0 HEAD)
-        else
-          echo "Previous version tag found: $PREVIOUS_TAG"
-          # Get the full commit hash for the previous tag
-          PREVIOUS_TAG=$(git rev-list -n 1 $PREVIOUS_TAG || echo "Failed to get commit hash for tag $PREVIOUS_TAG")
+        git log ${{ steps.previous_tag.outputs.PREVIOUS_TAG }}..HEAD --pretty=format:'- %s' > CHANGELOG.md
+
+    - name: Debug Changelog
+      run: |
+        echo "Contents of CHANGELOG.md:"
+        cat CHANGELOG.md
+
+    - name: Validate Changelog
+      id: validate_changelog
+      run: |
+        if echo "$CHANGELOG" | grep -q 'Merge pull request'; then
+          echo "Changelog contains merge commits - please squash commits before release"
+          exit 1
         fi
-        
-        echo "Using commit hash: $PREVIOUS_TAG as previous version"
-        echo "previous_version=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
       env:
-        VERSION: ${{ steps.version.outputs.version }}
+        CHANGELOG: ${{ steps.changelog.outputs.changelog }}
 
     - name: Check version and tags
       id: version_check
@@ -104,57 +98,6 @@ jobs:
         fi
       env:
         VERSION: ${{ steps.version.outputs.version }}
-
-    - name: Generate Changelog
-      id: changelog
-      run: |
-        VERSION=$(grep -oP '(?<="version" : \()[^)]+' holophonix_utils/__init__.py | tr -d " " | tr , .)
-        ALL_TAGS=$(git tag -l "v*" --sort=-version:refname)
-        PREVIOUS_TAG=$(echo "$ALL_TAGS" | grep -v "v$VERSION" | head -n 1)
-        
-        if [ -z "$PREVIOUS_TAG" ]; then
-          echo "No previous tag found, using initial commit"
-          PREVIOUS_TAG=$(git rev-list --max-parents=0 HEAD)
-        else
-          echo "Previous version tag found: $PREVIOUS_TAG"
-          # Get the full commit hash for the previous tag
-          PREVIOUS_TAG=$(git rev-list -n 1 $PREVIOUS_TAG || echo "Failed to get commit hash for tag $PREVIOUS_TAG")
-        fi
-        
-        echo "Using commit hash: $PREVIOUS_TAG as previous version"
-        
-        echo "# Changelog" > CHANGELOG.md
-        echo "## Changes since $PREVIOUS_TAG" >> CHANGELOG.md
-        COMMITS=$(git log --oneline  $PREVIOUS_TAG..HEAD)
-        if [ -z "$COMMITS" ]; then
-          echo "- No significant changes" >> CHANGELOG.md
-        else
-          echo "$COMMITS" | while IFS= read -r commit; do
-            COMMIT_HASH=$(echo "$commit" | cut -d' ' -f1)
-            COMMIT_MESSAGE=$(echo "$commit" | cut -d' ' -f2-)
-            COMMIT_TYPE=$(echo "$COMMIT_MESSAGE" | grep -oP '^\w+')
-            if [ -n "$COMMIT_TYPE" ]; then
-              COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed "s/^$COMMIT_TYPE/**$COMMIT_TYPE**/")
-            fi
-            echo "- $COMMIT_MESSAGE (\`$COMMIT_HASH\`)" >> CHANGELOG.md
-          done
-        fi
-        cat CHANGELOG.md
-
-    - name: Debug Changelog
-      run: |
-        echo "Contents of CHANGELOG.md:"
-        cat CHANGELOG.md
-
-    - name: Validate Changelog
-      id: validate_changelog
-      run: |
-        if echo "$CHANGELOG" | grep -q 'Merge pull request'; then
-          echo "Changelog contains merge commits - please squash commits before release"
-          exit 1
-        fi
-      env:
-        CHANGELOG: ${{ steps.changelog.outputs.changelog }}
 
     - name: Create Git Tag
       if: steps.version_check.outputs.release == 'true'
