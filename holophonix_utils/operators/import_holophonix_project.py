@@ -3,6 +3,7 @@ import os
 import zipfile
 import tempfile
 import shutil
+import json
 from ..utils.file_properties import FileProperties
 
 class SNA_OT_Import_Holophonix_Project(bpy.types.Operator):
@@ -30,6 +31,12 @@ class SNA_OT_Import_Holophonix_Project(bpy.types.Operator):
             master_folder = None
             for root, dirs, files in os.walk(temp_dir):
                 if 'manifest.json' in files and 'Venue' in dirs:
+                    FileProperties.manifest_path = os.path.join(root, 'manifest.json')
+                    with open(FileProperties.manifest_path, 'r') as f:
+                        manifest = json.load(f)
+                        if 'defaultPreset' in manifest:
+                            FileProperties.default_hol_file = manifest['defaultPreset']+'.hol'
+                            print(f"Default preset: {FileProperties.default_hol_file}")
                     # Check if 'Presets' is nested one level inside
                     presets_path = os.path.join(root, 'Presets')
                     if os.path.exists(presets_path):
