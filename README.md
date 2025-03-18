@@ -81,6 +81,12 @@ The addon provides comprehensive Holophonix project import capabilities:
   - Converts between cartesian and spherical coordinate systems
   - Handles elevation, azimuth, and distance calculations
 
+### Default `.hol` File Selection
+Automatically selects the default `.hol` file based on the `defaultPreset` value specified in the `manifest.json` file. This ensures the correct preset is selected by default, enhancing the user experience and reducing manual selection errors.
+
+- **Manifest File Parsing**: Reads the `manifest.json` file to retrieve the `defaultPreset` value.
+- **Default File Selection**: Searches for the corresponding `.hol` file in the `Presets` directory and sets it as the default in the dropdown.
+
 ### Venue Loading System
 
 The enhanced venue loading system:
@@ -209,3 +215,5 @@ Pull requests are welcome. For major changes, please open an issue first to disc
    - Transition from `/dump` to `/get` request system
    - Update all related API calls and endpoints
    - Ensure backward compatibility during transition
+
+2. **Revamp tracks and handlers section of the main panel**: Improve the UI and functionality of the tracks and handlers section to enhance usability and performance.
