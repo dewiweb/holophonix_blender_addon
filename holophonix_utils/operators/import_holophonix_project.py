@@ -34,9 +34,11 @@ class SNA_OT_Import_Holophonix_Project(bpy.types.Operator):
                     FileProperties.manifest_path = os.path.join(root, 'manifest.json')
                     with open(FileProperties.manifest_path, 'r') as f:
                         manifest = json.load(f)
-                        if 'defaultPreset' in manifest:
+                        if 'defaultPreset' in manifest and manifest['defaultPreset']:
                             FileProperties.default_hol_file = manifest['defaultPreset']+'.hol'
                             print(f"Default preset: {FileProperties.default_hol_file}")
+                        else:
+                            print("No default preset specified in manifest.json")
                     # Check if 'Presets' is nested one level inside
                     presets_path = os.path.join(root, 'Presets')
                     if os.path.exists(presets_path):
