@@ -20,6 +20,7 @@ class SNA_OT_Import_An_Tree_433Db(bpy.types.Operator):
                     directory=os.path.join(file_path, inner_path),
                     filename=name
                     )
+        bpy.data.node_groups["AN Tree"].globalScene = context.scene
         return {"FINISHED"}
 
     def invoke(self, context, event):
