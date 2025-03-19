@@ -132,7 +132,10 @@ class SNA_PT_TRACKS_11FF6(bpy.types.Panel):
             # Create handlers button
             row = col.row()
             row.scale_y = 1.5
-            row.operator("sna.create_track_handlers", text="Create OSC Handlers", icon='EXPORT')
+            create_op = row.operator("sna.create_track_handlers", text="Create OSC Handlers", icon='EXPORT')
+            # Explicitly set properties to avoid modal dialog
+            create_op.set_port_only = False
+            create_op.resolve_hostname_only = False
             row.alignment = 'CENTER'
         
         # Note: Legacy global handler controls removed as they are no longer necessary

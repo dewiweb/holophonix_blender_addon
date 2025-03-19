@@ -13,13 +13,15 @@ class SNA_OT_CreateTrackHandlers(bpy.types.Operator):
     set_port_only: bpy.props.BoolProperty(
         name="Set Port Only",
         description="Only set the NodeOSC port without creating handlers",
-        default=False
+        default=False,
+        options={"SKIP_SAVE", "HIDDEN"}
     )
     
     resolve_hostname_only: bpy.props.BoolProperty(
         name="Resolve Hostname Only",
         description="Only resolve the Holophonix hostname and set UDP output",
-        default=False
+        default=False,
+        options={"SKIP_SAVE", "HIDDEN"}
     )
     
     def execute(self, context):
