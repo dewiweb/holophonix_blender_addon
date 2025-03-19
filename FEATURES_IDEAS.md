@@ -2,6 +2,66 @@
 
 This document is a place to brainstorm and track potential feature ideas for the project.
 
+## Modular Track Handler Configuration
+
+### Overview
+A revamped Tracks Panel with a modular workflow for creating NodeOSC handlers. This enhancement will allow users to selectively create different types of track handlers with customizable directions, providing greater flexibility and control.
+
+### Features
+1. **Track Handler Categories**:
+   - **Position Handlers**: Create handlers for x, y, z coordinates of tracks.
+   - **Name Handlers**: Create handlers for track name properties.
+   - **Color Handlers**: Create handlers for track color properties.
+   - **Expandable**: System designed to easily add more handler categories in the future.
+
+2. **Direction Controls**:
+   - Configure each handler category as Input (receiving OSC), Output (sending OSC), or Both.
+   - Enable/disable specific handler categories independently.
+
+3. **Unified Interface**:
+   - Collapsible sections for each handler category.
+   - Centralized "Create/Update Handlers" button.
+   - Visual feedback on handler status.
+
+### Benefits
+1. **Granular Control**:
+   - Users can selectively enable only the handler types they need.
+   - Reduces clutter in the NodeOSC keys panel.
+
+2. **Direction-Specific Configuration**:
+   - Set up track properties to be input-only, output-only, or bidirectional.
+   - Customize OSC communication flow based on specific needs.
+
+3. **Workflow Efficiency**:
+   - Batch create multiple handler types with specific settings.
+   - Easily update existing handlers with new configurations.
+
+### Challenges
+1. **Backward Compatibility**:
+   - Maintain compatibility with existing handler enable/disable toggles.
+   - Ensure smooth migration from previous system.
+
+2. **UI Complexity**:
+   - Keep the interface intuitive despite added functionality.
+   - Prevent overwhelming users with too many options.
+
+### Implementation Steps
+1. **Property System**:
+   - Create new property groups for track handler categories.
+   - Implement direction enum properties for each category.
+
+2. **UI Design**:
+   - Design collapsible sections for each handler category.
+   - Create intuitive controls for enabling/disabling and setting directions.
+
+3. **Handler Creation Logic**:
+   - Develop modular handler creation functions based on category selections.
+   - Implement direction-aware handler creation.
+
+4. **Migration Strategy**:
+   - Set initial values based on existing settings.
+   - Maintain compatibility with legacy properties.
+
 ## Centralized Properties Panel for Tracks and Speakers
 
 ### Overview
