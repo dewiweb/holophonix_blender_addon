@@ -1,5 +1,11 @@
 import bpy
+import traceback
 from ..utils.plugin_utils import plugin_folder
+
+# This panel is no longer necessary as its functionality has been moved to
+# the SNA_PT_HolophonixNodeOSC panel in tracks_panel.py
+# To use this panel, add it to the classes list in __init__.py
+# This panel can be removed in a future version
 
 class SNA_PT_NodeOSC_Operations(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
@@ -28,7 +34,8 @@ class SNA_PT_NodeOSC_Operations(bpy.types.Panel):
                                        text='Delete all message handlers', 
                                        icon_value=context.window_manager.custom_icons['logo_icon'].icon_id)
             except Exception as e:
-                logger.error(f'Error creating delete handlers operator: {str(e)}')
+                print(f'Error creating delete handlers operator: {str(e)}')
+                traceback.print_exc()
                 layout.label(text='Error creating delete handlers operator', icon='ERROR')
 
             # Add export holo objects button
@@ -39,9 +46,11 @@ class SNA_PT_NodeOSC_Operations(bpy.types.Panel):
                                    emboss=True, 
                                    depress=False)
             except Exception as e:
-                logger.error(f'Error creating tracks exporter operator: {str(e)}')
+                print(f'Error creating tracks exporter operator: {str(e)}')
+                traceback.print_exc()
                 layout.label(text='Error creating tracks exporter operator', icon='ERROR')
 
         except Exception as e:
-            logger.error(f'Error drawing NodeOSC operations panel: {str(e)}')
+            print(f'Error drawing NodeOSC operations panel: {str(e)}')
+            traceback.print_exc()
             layout.label(text='Error loading panel content', icon='ERROR')
