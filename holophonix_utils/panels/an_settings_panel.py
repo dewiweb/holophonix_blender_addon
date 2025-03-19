@@ -12,7 +12,7 @@ class SNA_PT_AN_SETTINGS_E1993(bpy.types.Panel):
     bl_region_type = 'UI'
     bl_context = ''
     bl_order = 4
-    bl_parent_id = 'SNA_PT_HOLOUTILS_1B113'
+    bl_parent_id = 'SNA_PT_MAIN_PANEL'
     bl_ui_units_x=0
     bl_options = {'DEFAULT_CLOSED'}
 

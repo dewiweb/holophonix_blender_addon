@@ -11,12 +11,13 @@ _last_hol_file = None
 
 class SNA_PT_Import_Holophonix_Project(bpy.types.Panel):
     bl_idname = 'SNA_PT_Import_Holophonix_Project'
-    bl_label = 'Import Holophonix Project'
+    bl_label = 'Project Setup'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = 'Holophonix'
-    bl_parent_id = 'SNA_PT_HOLOUTILS_1B113'
+    bl_category = 'HOLOUTILS'
+    bl_parent_id = 'SNA_PT_MAIN_PANEL'
     bl_options = {'DEFAULT_CLOSED'}
+    bl_order = 0
 
     def draw_header(self, context):
         layout = self.layout
@@ -32,8 +33,26 @@ class SNA_PT_Import_Holophonix_Project(bpy.types.Panel):
             print(f"Current .hol file selection: {utils_props.holophonix_hol_files}")
             _last_hol_file = utils_props.holophonix_hol_files
         
-        # Import .zip file button
-        layout.operator(SNA_OT_Import_Holophonix_Project.bl_idname, text='Import .zip File')
+        # Project import section
+        box = layout.box()
+        box.label(text="Project Import", icon='IMPORT')
+        
+        # Complete project import
+        col = box.column(align=True)
+        col.label(text="Import Complete Holophonix Project", icon='PACKAGE')
+        row = col.row()
+        row.scale_y = 1.2
+        row.operator(SNA_OT_Import_Holophonix_Project.bl_idname, 
+                    text='Import Project Archive (.zip)', 
+                    icon='FILE_ARCHIVE')
+        
+        # Help text
+        help_box = box.box()
+        help_col = help_box.column(align=True)
+        help_col.scale_y = 0.9
+        help_col.label(text="Note: For individual components, use:", icon='INFO')
+        help_col.label(text="• Tracks panel - to import tracks")
+        help_col.label(text="• Speakers panel - to import speakers")
 
         # Display project name if imported
         if utils_props.project_imported and utils_props.project_name:
