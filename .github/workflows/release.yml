@@ -2,10 +2,22 @@ name: Release Workflow
 
 on:
   workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Force release type (auto, beta, stable)'
+        required: true
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - beta
+          - stable
   push:
     branches:
       - main
       - develop
+    paths:
+      - 'holophonix_utils/__init__.py'
   pull_request:
     branches:
       - main
@@ -15,103 +27,166 @@ on:
 
 permissions:
   contents: write
+  pull-requests: read
 
 jobs:
-  build:
+  validate:
+    name: Validate addon
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Extract version from __init__.py
-      id: version
-      run: |
-        VERSION=$(grep -oP '(?<="version" : \()[^)]+' holophonix_utils/__init__.py | tr -d " ")
-        VERSION=${VERSION//,/.}
-        echo "Extracted version: $VERSION"
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-    - name: Validate version format
-      id: version_validation
-      run: |
-        if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-          echo "Invalid version format: $VERSION"
-          exit 1
-        fi
-      env:
-        VERSION: ${{ steps.version.outputs.version }}
-
-    - name: Get previous version from latest tag
-      id: previous_version
-      run: |
-        PREVIOUS_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-        echo "Previous version: $PREVIOUS_VERSION"
-        echo "previous_version=$PREVIOUS_VERSION" >> $GITHUB_OUTPUT
-
-    - name: Check version and tags
-      id: version_check
-      run: |
-        # Get all tags for this version
-        EXISTING_TAGS=$(git tag -l "v$VERSION*")
-        
-        # Check if any release exists (beta or stable)
-        if gh release view "v$VERSION-beta" >/dev/null 2>&1 || \
-           gh release view "v$VERSION-stable" >/dev/null 2>&1 || \
-           [ -n "$EXISTING_TAGS" ]; then
-          echo "Release or tag already exists for version $VERSION"
-          echo "release=false" >> $GITHUB_OUTPUT
-        else
-          echo "No existing release or tag found for version $VERSION"
-          echo "release=true" >> $GITHUB_OUTPUT
-        fi
-      env:
-        VERSION: ${{ steps.version.outputs.version }}
-
-    - name: Determine release type
-      id: release_type
-      run: |
-        FEATURE_NUM=$(echo "$VERSION" | cut -d. -f2)
-        if [ $((FEATURE_NUM % 2)) -eq 1 ]; then
-          echo "type=beta" >> $GITHUB_OUTPUT
-        else
-          echo "type=stable" >> $GITHUB_OUTPUT
-        fi
-      env:
-        VERSION: ${{ steps.version.outputs.version }}
-
-    - name: Create Git Tag
-      if: steps.version_check.outputs.release == 'true'
-      run: |
-        git config --global user.name 'GitHub Actions'
-        git config --global user.email 'actions@github.com'
-        git tag v${{ steps.version.outputs.version }}-${{ steps.release_type.outputs.type }}
-        git push origin v${{ steps.version.outputs.version }}-${{ steps.release_type.outputs.type }}
-
-    - name: Zip the addon folder
-      if: steps.version_check.outputs.release == 'true'
-      run: |
-        zip -r holophonix_utils_v${{ steps.version.outputs.version }}_${{ steps.release_type.outputs.type }}.zip holophonix_utils
-
-    - name: Create Release
-      if: steps.version_check.outputs.release == 'true'
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: v${{ steps.version.outputs.version }}-${{ steps.release_type.outputs.type }}
-        release_name: Release v${{ steps.version.outputs.version }} ${{ steps.release_type.outputs.type }}
-        draft: false
-        prerelease: ${{ steps.release_type.outputs.type == 'beta' }}
-
-    - name: Upload Release Asset
-      if: steps.version_check.outputs.release == 'true'
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: holophonix_utils_v${{ steps.version.outputs.version }}_${{ steps.release_type.outputs.type }}.zip
-        asset_name: holophonix_utils_v${{ steps.version.outputs.version }}_${{ steps.release_type.outputs.type }}.zip
-        asset_content_type: application/zip
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for proper versioning
+          
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 pylint pytest
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+            
+      - name: Lint with flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 holophonix_utils --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings
+          flake8 holophonix_utils --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+  
+  build:
+    name: Build and release
+    runs-on: ubuntu-latest
+    needs: validate
+    if: success() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Install GH CLI
+        run: |
+          type -p curl >/dev/null || apt install curl -y
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt update
+          sudo apt install gh -y
+      
+      - name: Extract version from __init__.py
+        id: version
+        run: |
+          VERSION=$(grep -oP '(?<="version" : \()[^)]+' holophonix_utils/__init__.py | tr -d " ")
+          VERSION=${VERSION//,/.}
+          echo "Extracted version: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Validate version format
+        id: version_validation
+        run: |
+          if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Invalid version format: $VERSION"
+            exit 1
+          fi
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+      
+      - name: Get previous version from latest tag
+        id: previous_version
+        run: |
+          PREVIOUS_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "Previous version: $PREVIOUS_VERSION"
+          echo "previous_version=$PREVIOUS_VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Check version and tags
+        id: version_check
+        run: |
+          # Get all tags for this version
+          EXISTING_TAGS=$(git tag -l "v$VERSION*")
+          
+          # Check if any release exists (beta or stable)
+          if gh release view "v$VERSION-beta" >/dev/null 2>&1 || \
+             gh release view "v$VERSION-stable" >/dev/null 2>&1 || \
+             [ -n "$EXISTING_TAGS" ]; then
+            echo "Release or tag already exists for version $VERSION"
+            echo "release=false" >> $GITHUB_OUTPUT
+          else
+            echo "No existing release or tag found for version $VERSION"
+            echo "release=true" >> $GITHUB_OUTPUT
+          fi
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Determine release type
+        id: release_type
+        run: |
+          # Check if release type is forced via workflow_dispatch
+          if [ "${{ github.event.inputs.release_type }}" != "auto" ] && \
+             [ "${{ github.event.inputs.release_type }}" != "" ]; then
+            echo "type=${{ github.event.inputs.release_type }}" >> $GITHUB_OUTPUT
+            echo "Using manually specified release type: ${{ github.event.inputs.release_type }}"
+            exit 0
+          fi
+          
+          # Auto-determine based on version
+          FEATURE_NUM=$(echo "$VERSION" | cut -d. -f2)
+          if [ $((FEATURE_NUM % 2)) -eq 1 ]; then
+            echo "type=beta" >> $GITHUB_OUTPUT
+            echo "Automatically determined release type: beta"
+          else
+            echo "type=stable" >> $GITHUB_OUTPUT
+            echo "Automatically determined release type: stable"
+          fi
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+      
+      - name: Generate changelog
+        id: changelog
+        if: steps.version_check.outputs.release == 'true'
+        run: |
+          # Get all commits since the last tag
+          echo "## What's Changed" > changelog.md
+          git log ${{ steps.previous_version.outputs.previous_version }}..HEAD --pretty=format:"- %s" --no-merges >> changelog.md
+          cat changelog.md
+      
+      - name: Create Git Tag
+        if: steps.version_check.outputs.release == 'true'
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git tag v${{ steps.version.outputs.version }}-${{ steps.release_type.outputs.type }}
+          git push origin v${{ steps.version.outputs.version }}-${{ steps.release_type.outputs.type }}
+      
+      - name: Zip the addon folder
+        if: steps.version_check.outputs.release == 'true'
+        run: |
+          mkdir -p dist
+          zip -r dist/holophonix_utils_v${{ steps.version.outputs.version }}_${{ steps.release_type.outputs.type }}.zip holophonix_utils
+          echo "Created addon zip file"
+          ls -la dist/
+      
+      - name: Create Release
+        if: steps.version_check.outputs.release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}-${{ steps.release_type.outputs.type }}
+          name: Release v${{ steps.version.outputs.version }} ${{ steps.release_type.outputs.type }}
+          body_path: changelog.md
+          draft: false
+          prerelease: ${{ steps.release_type.outputs.type == 'beta' }}
+          files: |
+            dist/holophonix_utils_v${{ steps.version.outputs.version }}_${{ steps.release_type.outputs.type }}.zip
+          fail_on_unmatched_files: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Notify success
+        if: steps.version_check.outputs.release == 'true' && success()
+        run: |
+          echo "::notice::Successfully released version v${{ steps.version.outputs.version }}-${{ steps.release_type.outputs.type }}"
