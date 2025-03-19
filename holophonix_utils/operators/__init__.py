@@ -10,6 +10,10 @@ from .export_create_handlers import SNA_OT_ExportAndCreateHandlers
 from .import_tracks import SNA_OT_Import_Tracks
 from .import_speakers import SNA_OT_Import_Speakers
 from .select_hol_file import SNA_OT_Select_Hol_File
+from .create_track_handlers import SNA_OT_CreateTrackHandlers, SNA_OT_ResolveHolophonixHostname
+from .initialize_track_handlers import SNA_OT_InitializeTrackHandlers
+from .select_all_tracks import SNA_OT_SelectAllTracks
+from .select_all_speakers import SNA_OT_SelectAllSpeakers
 
 __all__ = [
     "SNA_OT_Load_Venue",
@@ -18,10 +22,15 @@ __all__ = [
     "SNA_OT_Add_Tracks_73B0D",
     "SNA_OT_Import_An_Tree_433Db",
     "SNA_OT_Tracks_Exporter_34F69",
+    "SNA_OT_InitializeTrackHandlers",
     "SNA_OT_Add_Speakers_994C8",
     "SNA_OT_Add_Handlers",
     "SNA_OT_ExportAndCreateHandlers",
+    "SNA_OT_CreateTrackHandlers",
     "SNA_OT_Import_Tracks",
     "SNA_OT_Import_Speakers",
-    "SNA_OT_Select_Hol_File"
+    "SNA_OT_Select_Hol_File",
+    "SNA_OT_SelectAllTracks",
+    "SNA_OT_SelectAllSpeakers",
+    "SNA_OT_ResolveHolophonixHostname"
 ]
