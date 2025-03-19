@@ -2,8 +2,16 @@ import bpy
 import os
 from bpy.utils import previews
 from ..utils.file_properties import FileProperties
+from ..utils.handler_properties import TrackHandlerProperties
 
 class HolophonixUtilsProperties(bpy.types.PropertyGroup):
+    # Property to store resolved Holophonix IP address
+    holophonix_ip: bpy.props.StringProperty(
+        name="Holophonix IP Address",
+        description="The resolved IP address of holophonix.local",
+        default=""
+    )
+    
     def register_icons(self):
         icons_dir = os.path.join(os.path.dirname(__file__), 'icons')
         self.icons = bpy.utils.previews.new()
@@ -96,6 +104,10 @@ class HolophonixUtilsProperties(bpy.types.PropertyGroup):
         default=True,
         update=update_outgoing_tracks
     )
+    
+    # Track handler configuration properties
+    track_handlers: bpy.props.PointerProperty(type=TrackHandlerProperties)
+    track_handlers_initialized: bpy.props.BoolProperty(default=False)
 
     enable_speaker: bpy.props.BoolProperty(
         name="Enable Speaker Handler",

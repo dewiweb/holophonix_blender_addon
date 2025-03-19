@@ -8,10 +8,15 @@ from ..utils.math_utils import cart2sph, sph2cart
 
 class SNA_OT_Add_Tracks_73B0D(bpy.types.Operator, ImportHelper):
     bl_idname = "sna.add_tracks_73b0d"
-    bl_label = "Add Tracks"
-    bl_description = "replace actual tracks by those in imported hol preset file"
+    bl_label = "Import Tracks Only"
+    bl_description = "Import tracks from a single .hol file (does not import venue, presets, or other project data)"
     bl_options = {"REGISTER", "UNDO"}
-    filter_glob: bpy.props.StringProperty( default='*.hol', options={'HIDDEN'} )
+    # File selector settings
+    filename_ext = ".hol"
+    filter_glob: bpy.props.StringProperty(
+        default="*.hol",
+        options={'HIDDEN'}
+    )
 
     @classmethod
     def poll(cls, context):
@@ -94,13 +99,26 @@ class SNA_OT_Add_Tracks_73B0D(bpy.types.Operator, ImportHelper):
                         end_loc = len(p_tuple)-5
                         trk_glb = str(p_tuple[0])[18:end_loc]
                         print(i,"j'ai un glb",trk_glb)
-                elif param == params[1]:
+                elif param == params[1]:  # '/color'
                     col_path = [path for path in audio_engine_dict if tuple in path]
                     if col_path != []:
                         print(i,"j'ai une couleur",col_path)
                         col_path = col_path[0].split()
-                        for j in range(0,4):
-                            trk_color[j] = float(col_path[j+1])
+                        # Ensure we have enough values
+                        if len(col_path) >= 5:  # Format should be like: /track/1/color 0.5 0.2 0.8 1.0
+                            # Extract RGB and Alpha values
+                            try:
+                                for j in range(0,4):
+                                    trk_color[j] = float(col_path[j+1])
+                                print(f"Extracted color: {trk_color}")
+                            except (ValueError, IndexError) as e:
+                                print(f"Error parsing color values: {e}")
+                                # Default to a visible color on error
+                                trk_color = [0.8, 0.2, 0.2, 1.0]
+                        else:
+                            print(f"Color data format unexpected: {col_path}")
+                            # Default to a visible color if format is unexpected
+                            trk_color = [0.2, 0.8, 0.2, 1.0]
                 elif param == params[2]:
                     azim_path = [path for path in audio_engine_dict if tuple in path]
                     if azim_path != []:
@@ -157,8 +175,26 @@ class SNA_OT_Add_Tracks_73B0D(bpy.types.Operator, ImportHelper):
                         trk.data.name = trk.name
                         for k in range(0,3):
                             trk.location[k] = trk_cart_coord[k]
+                            
+                        # Create a new material and apply the color
                         trk_material = bpy.data.materials.new(name = trk.name+'.mat')
                         trk.data.materials.clear()
                         trk.data.materials.append(trk_material)
+                        
+                        # Debug output for color values
+                        print(f"Track {trk.name} - Color before setting: {trk_color}")
+                        
+                        # Make sure the alpha is 1.0 if it's not specified
+                        if len(trk_color) == 4 and trk_color[3] == 0:
+                            trk_color[3] = 1.0
+                        
+                        # Ensure color is properly formatted for Blender
+                        if all(c == 0 for c in trk_color[:3]):
+                            # Default color if no color is specified
+                            trk_color = [0.8, 0.8, 0.8, 1.0]
+                        
+                        print(f"Track {trk.name} - Color after adjustment: {trk_color}")
+                        
+                        # Apply the color to the material
                         bpy.data.materials[trk.name+'.mat'].diffuse_color = trk_color
         return {"FINISHED"}

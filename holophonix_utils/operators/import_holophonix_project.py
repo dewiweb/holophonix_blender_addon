@@ -8,11 +8,21 @@ from ..utils.file_properties import FileProperties
 
 class SNA_OT_Import_Holophonix_Project(bpy.types.Operator):
     bl_idname = "sna.import_holophonix_project"
-    bl_label = "Import Holophonix Project"
-    bl_description = "Import a Holophonix project from a .zip file"
+    bl_label = "Import Complete Project"
+    bl_description = "Import a complete Holophonix project archive (.zip) containing tracks, venue models, presets, and other project data"
     bl_options = {"REGISTER", "UNDO"}
 
-    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
+    # File selector settings
+    filename_ext = ".zip"
+    filepath: bpy.props.StringProperty(
+        subtype="FILE_PATH",
+        default="",
+        options={'HIDDEN'}
+    )
+    filter_glob: bpy.props.StringProperty(
+        default='*.zip',
+        options={'HIDDEN'}
+    )
 
     def execute(self, context):
         # Ensure the selected file is a .zip file
