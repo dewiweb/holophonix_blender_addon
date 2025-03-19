@@ -16,7 +16,7 @@ bl_info = {
     "author" : "Dewiweb",
     "description" : "",
     "blender" : (4, 3, 0),
-    "version" : (1, 2, 0),
+    "version" : (1, 3, 0),
     "location" : "",
     "warning" : "",
     "doc_url": "",
@@ -29,6 +29,8 @@ import os
 from .utils import (
     HolophonixUtilsProperties,
     HandlerProperties,
+    TrackHandlerCategoryProperties,
+    TrackHandlerProperties,
     IconUtils
 )
 from .utils.file_properties import FileProperties
@@ -37,15 +39,18 @@ from .operators import *
 
 classes = [
     # Properties
+    TrackHandlerCategoryProperties,  # Must come first - no dependencies
+    TrackHandlerProperties,         # Depends on TrackHandlerCategoryProperties
+    HandlerProperties,              # Depends on TrackHandlerProperties
     HolophonixUtilsProperties,
-    HandlerProperties,
     FileProperties,
     IconUtils,
     # Panels
-    SNA_PT_HOLOUTILS_1B113,
-    SNA_PT_NodeOSC_Operations,
+    SNA_PT_MAIN_PANEL,
+    # SNA_PT_NodeOSC_Operations,  # Functionality moved to SNA_PT_HolophonixNodeOSC
     SNA_PT_SPECIALHANDLERS,
     SNA_PT_TRACKS_11FF6,
+    SNA_PT_HolophonixNodeOSC,
     SNA_PT_SPEAKERS_F8536,
     SNA_PT_AN_SETTINGS_E1993,
     SNA_PT_Import_Holophonix_Project,
@@ -57,11 +62,16 @@ classes = [
     SNA_OT_Add_Speakers_994C8,
     SNA_OT_Add_Handlers,
     SNA_OT_ExportAndCreateHandlers,
+    SNA_OT_CreateTrackHandlers,
+    SNA_OT_InitializeTrackHandlers,
     SNA_OT_Import_Holophonix_Project,
     SNA_OT_Load_Venue,
     SNA_OT_Import_Tracks,
     SNA_OT_Import_Speakers,
-    SNA_OT_Select_Hol_File
+    SNA_OT_Select_Hol_File,
+    SNA_OT_SelectAllTracks,
+    SNA_OT_SelectAllSpeakers,
+    SNA_OT_ResolveHolophonixHostname
 ]
 
 def register():
@@ -89,8 +99,20 @@ def register():
             bpy.app.handlers.depsgraph_update_post.remove(deferred_icon_registration)
 
     bpy.app.handlers.depsgraph_update_post.append(deferred_icon_registration)
+    
+    # Add handler to initialize track handlers properties
+    from .utils import initialize_track_handlers
+    # First remove any existing copy of the handler to avoid duplicates
+    if initialize_track_handlers in bpy.app.handlers.depsgraph_update_post:
+        bpy.app.handlers.depsgraph_update_post.remove(initialize_track_handlers)
+    bpy.app.handlers.depsgraph_update_post.append(initialize_track_handlers)
 
 def unregister():
+    # Clean up app handlers
+    from .utils import initialize_track_handlers
+    if initialize_track_handlers in bpy.app.handlers.depsgraph_update_post:
+        bpy.app.handlers.depsgraph_update_post.remove(initialize_track_handlers)
+        
     if hasattr(bpy.context, 'scene') and bpy.context.scene is not None:
         bpy.context.scene.holophonix_utils.unregister_icons()
 
