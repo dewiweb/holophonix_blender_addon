@@ -69,23 +69,16 @@ class SNA_OT_CreateTrackHandlers(bpy.types.Operator):
                     index = obj.name.split(".")[1]
                     id = int(index)
                     
-                    if direction in ['INPUT', 'BOTH']:
-                        result = self.create_track_handler(context, obj, id, "x", 0, "INPUT")
-                        result += self.create_track_handler(context, obj, id, "y", 1, "INPUT")
-                        result += self.create_track_handler(context, obj, id, "z", 2, "INPUT")
-                        if result == 0:
-                            updated_count += 3
-                        else:
-                            created_count += result
-                        
-                    if direction in ['OUTPUT', 'BOTH']:
-                        result = self.create_track_handler(context, obj, id, "x", 0, "OUTPUT")
-                        result += self.create_track_handler(context, obj, id, "y", 1, "OUTPUT")
-                        result += self.create_track_handler(context, obj, id, "z", 2, "OUTPUT")
-                        if result == 0:
-                            updated_count += 3
-                        else:
-                            created_count += result
+                    # Use NodeOSC's native BOTH direction instead of creating separate handlers
+                    handler_direction = direction  # Use the selected direction directly
+                    
+                    result = self.create_track_handler(context, obj, id, "x", 0, handler_direction)
+                    result += self.create_track_handler(context, obj, id, "y", 1, handler_direction)
+                    result += self.create_track_handler(context, obj, id, "z", 2, handler_direction)
+                    if result == 0:
+                        updated_count += 3
+                    else:
+                        created_count += result
                 except Exception as e:
                     self.report({"ERROR"}, f"Error creating position handlers for {obj.name}: {str(e)}")
         
@@ -97,19 +90,14 @@ class SNA_OT_CreateTrackHandlers(bpy.types.Operator):
                     index = obj.name.split(".")[1]
                     id = int(index)
                     
-                    if direction in ['INPUT', 'BOTH']:
-                        result = self.create_name_handler(context, obj, id, "INPUT")
-                        if result == 0:
-                            updated_count += 1
-                        else:
-                            created_count += result
-                        
-                    if direction in ['OUTPUT', 'BOTH']:
-                        result = self.create_name_handler(context, obj, id, "OUTPUT")
-                        if result == 0:
-                            updated_count += 1
-                        else:
-                            created_count += result
+                    # Use NodeOSC's native BOTH direction instead of creating separate handlers
+                    handler_direction = direction  # Use the selected direction directly
+                    
+                    result = self.create_name_handler(context, obj, id, handler_direction)
+                    if result == 0:
+                        updated_count += 1
+                    else:
+                        created_count += result
                 except Exception as e:
                     self.report({"ERROR"}, f"Error creating name handlers for {obj.name}: {str(e)}")
         
@@ -121,19 +109,14 @@ class SNA_OT_CreateTrackHandlers(bpy.types.Operator):
                     index = obj.name.split(".")[1]
                     id = int(index)
                     
-                    if direction in ['INPUT', 'BOTH']:
-                        result = self.create_color_handler(context, obj, id, "INPUT")
-                        if result == 0:
-                            updated_count += 1
-                        else:
-                            created_count += result
-                        
-                    if direction in ['OUTPUT', 'BOTH']:
-                        result = self.create_color_handler(context, obj, id, "OUTPUT")
-                        if result == 0:
-                            updated_count += 1
-                        else:
-                            created_count += result
+                    # Use NodeOSC's native BOTH direction instead of creating separate handlers
+                    handler_direction = direction  # Use the selected direction directly
+                    
+                    result = self.create_color_handler(context, obj, id, handler_direction)
+                    if result == 0:
+                        updated_count += 1
+                    else:
+                        created_count += result
                 except Exception as e:
                     self.report({"ERROR"}, f"Error creating color handlers for {obj.name}: {str(e)}")
                     
