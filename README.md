@@ -102,6 +102,15 @@ Our addon provides integration with NodeOSC for:
 - Enable/disable control for incoming/outgoing handlers
 - Configuration of handler properties and priorities
 - Management of handler lifecycle and cleanup
+- Special handlers for global controls and animations
+
+### Holophonix Communication Panel
+
+A dedicated panel for NodeOSC configuration specific to Holophonix:
+- Automatic hostname resolution for 'holophonix.local'
+- Easy configuration of NodeOSC port (4003) for Holophonix compatibility
+- Real-time status monitoring of communication settings
+- Clear visual indicators for properly configured connections
 
 ### OSC Integration
 
@@ -109,6 +118,7 @@ The addon works with NodeOSC to:
 - Configure handler settings for tracks
 - Enable real-time control of audio parameters
 - Support synchronization with visual elements
+- Provide direct integration with Holophonix processors
 
 ### AN Settings
 
@@ -128,15 +138,18 @@ The addon works with NodeOSC to:
 
 2. **Access the Panel**:
    - Open the 3D View sidebar (N key)
-   - Find the 'Holophonix Utils' tab
+   - Find the 'HOLOUTILS' tab
+   - The main panel provides an overview and access to subpanels
+   - All functionality is organized into logical subpanels
 
 3. **Import Your Setup**:
    - Click 'Import' in the Sources or Speakers panel
    - Select your `.hol` preset file
 
 4. **Configure OSC**:
-   - Set up your OSC connections in the NodeOSC panel
-   - Enable handlers for the features you need
+   - Use the Holophonix Communication panel to set up connections
+   - The system will automatically attempt to resolve 'holophonix.local'
+   - Set the correct port (4003) and apply resolved IP address
 
 ### Practical Examples
 
@@ -157,9 +170,11 @@ The addon works with NodeOSC to:
 - Check Blender's console for import errors
 
 **Issue**: OSC not working
-- Confirm IP and port settings
+- Check the Holophonix Communication panel for status
+- Ensure 'holophonix.local' has been properly resolved to an IP address
+- Verify port is set to 4003 for Holophonix compatibility
 - Check firewall/network settings
-- Verify NodeOSC is properly configured
+- Verify NodeOSC is properly installed and enabled
 
 ## About Holophonix
 
