@@ -50,9 +50,9 @@ class SNA_OT_CreateTrackHandlers(bpy.types.Operator):
         props = context.scene.holophonix_utils
         track_handlers = props.track_handlers
         
-        # When creating handlers, we also want to ensure the port and UDP out are correctly set
-        # This is separate from the buttons that only do one specific task
-        self.set_nodeosc_port(context, resolve_hostname=True)
+        # When creating handlers, we only ensure the port is correctly set
+        # We don't try to resolve the hostname by default to avoid errors
+        self.set_nodeosc_port(context, resolve_hostname=False)
         
         # First, clean up any handlers that should no longer exist based on enabled state
         self.update_existing_handlers(context, track_handlers)
