@@ -59,81 +59,15 @@ class SNA_PT_TRACKS_11FF6(bpy.types.Panel):
             col.label(text="No Tracks Found", icon='INFO')
             col.label(text="Import tracks using the buttons above")
         
-        # Track handlers configuration section
-        # Only show if NodeOSC is available
-        if not hasattr(context.scene, 'NodeOSC_keys'):
-            layout.label(text="NodeOSC addon is not installed or enabled", icon='ERROR')
-            return
+        # Note: Track handlers configuration is now in a sub-panel
+        # See track_handlers_panel.py for the implementation
         
-        # Check if there are tracks
-        tracks = [obj for obj in context.scene.objects if "track" in obj.name]
-        if not tracks:
-            layout.label(text="No tracks found. Import tracks first.", icon='INFO')
-            return
-            
-        # Handler configuration section - only if tracks and NodeOSC present
-        if tracks:
+        # Add a note about NodeOSC requirement for track handlers
+        if not hasattr(context.scene, 'NodeOSC_keys'):
             box = layout.box()
-            box.label(text="OSC Track Handler Configuration", icon='NODETREE')
-            
-            track_handlers = props.track_handlers
-            
-            # Create a nice layout with columns
-            col = box.column(align=True)
-            
-            # Add explanation section
-            help_box = col.box()
-            help_col = help_box.column(align=True)
-            help_col.label(text="Data Flow Direction:", icon='INFO')
-            help_col.label(text="INPUT: Blender → Holophonix (Blender controls Holophonix)")
-            help_col.label(text="OUTPUT: Holophonix → Blender (Holophonix controls Blender)")
-            
-            # Handler types section
-            col.separator()
-            col.label(text="Handler Types:", icon='PRESET_NEW')
-            
-            # Use a table-like layout for clarity
-            grid = col.grid_flow(row_major=True, columns=3, even_columns=True)
-            grid.label(text="Handler Type")
-            grid.label(text="Enabled")
-            grid.label(text="Direction")
-            
-            # Position handlers
-            grid.label(text="Position", icon='OBJECT_ORIGIN')
-            grid.prop(track_handlers.position, "enabled", text="")
-            if track_handlers.position.enabled:
-                grid.prop(track_handlers.position, "direction", text="")
-            else:
-                grid.label(text="---")
-                
-            # Name handlers
-            grid.label(text="Name", icon='FONT_DATA')
-            grid.prop(track_handlers.name, "enabled", text="")
-            if track_handlers.name.enabled:
-                grid.prop(track_handlers.name, "direction", text="")
-            else:
-                grid.label(text="---")
-            
-            # Color handlers
-            grid.label(text="Color", icon='COLOR')
-            grid.prop(track_handlers.color, "enabled", text="")
-            if track_handlers.color.enabled:
-                grid.prop(track_handlers.color, "direction", text="")
-            else:
-                grid.label(text="---")
-                
-            col.separator()
-            
-            # Help text
-            col.label(text="Settings will update automatically. Click below to create handlers:", icon='HELP')
-            
-            col.separator()
-            
-            # Create handlers button
-            row = col.row()
-            row.scale_y = 1.5
-            row.operator("sna.create_track_handlers", text="Create OSC Handlers", icon='EXPORT')
-            row.alignment = 'CENTER'
+            box.label(text="NodeOSC addon is required for track handlers", icon='ERROR')
+            col = box.column()
+            col.label(text="Please install and enable the NodeOSC addon")
         
         # Note: Legacy global handler controls removed as they are no longer necessary
         # Individual handlers can now be controlled separately
