@@ -61,11 +61,11 @@ class SNA_PT_HolophonixNodeOSC(bpy.types.Panel):
         
         # Port configuration button
         port_row = config_box.row()
-        port_op = port_row.operator("sna.create_track_handlers", 
+        port_op = port_row.operator("sna.holophonix_communication", 
                               text="Set Port to 4003", 
                               icon='CHECKMARK' if context.scene.nodeosc_envars.port_out == 4003 else 'ERROR')
         port_op.set_port_only = True
-        port_op.resolve_hostname_only = False
+        port_op.apply_ip_only = False
         
         # If holophonix_ip is stored in scene props, show the UI to apply it
         if hasattr(context.scene, 'holophonix_utils') and hasattr(context.scene.holophonix_utils, 'holophonix_ip'):
@@ -78,11 +78,11 @@ class SNA_PT_HolophonixNodeOSC(bpy.types.Panel):
                 # Only show Apply button if the IP doesn't match current UDP out
                 if context.scene.nodeosc_envars.udp_out != ip:
                     apply_row = config_box.row()
-                    hostname_op = apply_row.operator("sna.create_track_handlers", 
+                    hostname_op = apply_row.operator("sna.holophonix_communication", 
                                                 text=f"Apply IP Address", 
                                                 icon='URL')
                     hostname_op.set_port_only = False
-                    hostname_op.resolve_hostname_only = True
+                    hostname_op.apply_ip_only = True
                 else:
                     ip_status_row = config_box.row()
                     ip_status_row.label(text="IP is already set correctly", icon='CHECKMARK')
