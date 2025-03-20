@@ -5,6 +5,7 @@ import json
 import numpy
 from math import radians
 from ..utils.math_utils import cart2sph, sph2cart
+from .manage_track_handlers import SNA_OT_ManageTrackHandlers
 
 class SNA_OT_Add_Tracks_73B0D(bpy.types.Operator, ImportHelper):
     bl_idname = "sna.add_tracks_73b0d"
@@ -22,7 +23,24 @@ class SNA_OT_Add_Tracks_73B0D(bpy.types.Operator, ImportHelper):
     def poll(cls, context):
         return not False
 
+    def clear_track_handlers(self, context):
+        """Clear existing track handlers before importing new tracks"""
+        # Check if NodeOSC is available
+        if not hasattr(context.scene, 'NodeOSC_keys'):
+            print("NodeOSC is not available, skipping handler cleanup")
+            return
+            
+        # Create an instance of the handler manager
+        handler_manager = SNA_OT_ManageTrackHandlers()
+        
+        # Call the clear_existing_handlers method
+        handler_manager.clear_existing_handlers(context)
+        print("Cleared existing track handlers before importing new tracks")
+    
     def execute(self, context):
+        # Clear existing track handlers first
+        self.clear_track_handlers(context)
+        
         preset_file_path = self.filepath
         file_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'amadeus.blend')
         Variable = None

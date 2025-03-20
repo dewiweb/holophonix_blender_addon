@@ -16,6 +16,7 @@
 - Add better support for multiple scenes
 - Update panel parent-child relationships for better organization
 - Rename main panel file and update class names for clarity
+- Clear existing track handlers when selecting a new .hol file or importing tracks directly
 
 ### Bug Fixes
 - Fix issue where direction changes weren't applied to disabled handlers
