@@ -2,68 +2,12 @@ import bpy
 
 def update_handlers_deferred(context):
     """Deferred handler update function to avoid recursion"""
-    # Call the create track handlers operator
-    if hasattr(bpy.ops.sna, 'create_track_handlers'):
-        bpy.ops.sna.create_track_handlers()
+    # Call the manage track handlers operator
+    if hasattr(bpy.ops.sna, 'manage_track_handlers'):
+        bpy.ops.sna.manage_track_handlers()
     return None  # Remove timer
 
-class TrackHandlerCategoryProperties(bpy.types.PropertyGroup):
-    def update_handlers(self, context):
-        """Update existing handlers when properties change"""
-        # Ensure this doesn't run during initialization
-        props = context.scene.holophonix_utils
-        if not props.track_handlers_initialized:
-            return
-            
-        # Call CreateTrackHandlers operator to update handlers
-        # This is deferred to avoid recursion and UI freezing
-        bpy.app.timers.register(lambda: update_handlers_deferred(context), first_interval=0.1)
-    
-    enabled: bpy.props.BoolProperty(
-        name="Enable",
-        default=True,
-        update=update_handlers
-    )
-    
-    direction: bpy.props.EnumProperty(
-        name="Direction",
-        items=[
-            ('INPUT', 'Input', 'Receive OSC messages only'),
-            ('OUTPUT', 'Output', 'Send OSC messages only'),
-            ('BOTH', 'Both', 'Send and receive OSC messages')
-        ],
-        default='BOTH',
-        update=update_handlers
-    )
-
-class TrackHandlerProperties(bpy.types.PropertyGroup):
-    position: bpy.props.PointerProperty(type=TrackHandlerCategoryProperties)
-    name: bpy.props.PointerProperty(type=TrackHandlerCategoryProperties)
-    color: bpy.props.PointerProperty(type=TrackHandlerCategoryProperties)
-    
-    # For backward compatibility
-    def update_legacy_properties(self, context):
-        """Update the legacy enable_incoming_tracks and enable_outgoing_tracks properties"""
-        props = context.scene.holophonix_utils
-        
-        # Calculate if any category is enabled for inputs/outputs
-        has_input = False
-        has_output = False
-        
-        for category_name in ['position', 'name', 'color']:
-            category = getattr(self, category_name)
-            if category.enabled:
-                if category.direction in ['INPUT', 'BOTH']:
-                    has_input = True
-                if category.direction in ['OUTPUT', 'BOTH']:
-                    has_output = True
-        
-        # Update legacy properties
-        if props.enable_incoming_tracks != has_input:
-            props.enable_incoming_tracks = has_input
-            
-        if props.enable_outgoing_tracks != has_output:
-            props.enable_outgoing_tracks = has_output
+# Legacy classes have been removed and replaced with new implementation in track_handler_settings.py
 
 class HandlerProperties(bpy.types.PropertyGroup):
     def update_dump(self, context):
@@ -169,6 +113,4 @@ class HandlerProperties(bpy.types.PropertyGroup):
         default=True
     )
     
-    # Track handler categories
-    track_handlers: bpy.props.PointerProperty(type=TrackHandlerProperties)
-    track_handlers_initialized: bpy.props.BoolProperty(default=False)
+    # Track handler categories - removed and replaced with new implementation in track_handler_settings.py
