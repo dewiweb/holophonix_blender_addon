@@ -115,3 +115,56 @@ The implementation will be considered complete when:
 2. The old code is removed or properly commented out
 3. The new system functions correctly in all test cases
 4. The code is well-documented and follows the addon's coding standards
+
+### Current Task: Handler Cleanup When Loading New .hol Files
+
+**Issue:**
+When loading a new .hol file, old track handlers are only disabled but remain in the NodeOSC_keys collection, potentially causing resource leaks and state confusion.
+
+**Solution:**
+1. **Full Handler Removal**
+   - Remove old handlers from NodeOSC_keys collection
+   - Ensure complete cleanup before adding new handlers
+   - Add error handling for the transition
+
+2. **Distinct Cleanup Modes**
+   - Full removal for .hol file changes
+   - Disable/enable for regular updates
+
+3. **State Tracking**
+   - Track handler source (.hol file)
+   - Clear handlers by source
+
+**Implementation Steps:**
+1. Add handler removal method
+2. Modify execute method to call removal before creation
+3. Update clear method to handle both modes
+4. Add error handling and logging
+
+### Future Task: Track-Handler Lifecycle Management
+
+**Objective:** 
+Link track objects to their handlers for automatic cleanup and better resource management.
+
+**Implementation Steps:**
+
+1. **Track-Handler Association**
+   - Add track reference to handler properties
+   - Store track ID in handler metadata
+   - Create mapping between tracks and handlers
+
+2. **Automatic Cleanup**
+   - Add handler removal when track is deleted
+   - Implement through Blender's app handlers
+   - Add error handling for edge cases
+
+3. **UI Integration**
+   - Add visual feedback for linked handlers
+   - Provide cleanup options in UI
+   - Add status indicators
+
+**Expected Benefits:**
+- Automatic cleanup of orphaned handlers
+- Better resource management
+- More intuitive user experience
+- Easier debugging and troubleshooting
