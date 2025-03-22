@@ -41,6 +41,7 @@ class SNA_OT_Import_Tracks(bpy.types.Operator):
         # Find all track objects
         for obj in bpy.context.scene.objects:
             if "track" in obj.name:
+                print(f"Found track object: {obj.name}")
                 # Collect used meshes and materials
                 if obj.data:
                     track_meshes.add(obj.data.name)
@@ -48,9 +49,25 @@ class SNA_OT_Import_Tracks(bpy.types.Operator):
                     if mat_slot.material:
                         track_materials.add(mat_slot.material.name)
                 tracks_to_delete.append(obj)
+            else:
+                print(f"Not a track object: {obj.name}")
 
         # Delete track objects directly
         for obj in tracks_to_delete:
+            print(f"Deleting track object: {obj.name}")
+            # Clean up related NodeOSC_keys
+            if hasattr(bpy.context.scene, 'NodeOSC_keys'):
+                keys_to_remove = [
+                    key for key in bpy.context.scene.NodeOSC_keys
+                    if obj.name in key.data_path
+                ]
+                for key in reversed(keys_to_remove):
+                    index = bpy.context.scene.NodeOSC_keys.find(key.name)
+                    if index >= 0:
+                        bpy.context.scene.NodeOSC_keys.remove(index)
+                        print(f"Removed NodeOSC_key for track {obj.name}")
+            
+            # Delete the track object
             bpy.data.objects.remove(obj, do_unlink=True)
 
         # Clean up track meshes and materials
