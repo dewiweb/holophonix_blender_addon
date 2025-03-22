@@ -1,6 +1,5 @@
 import bpy
 import os
-from ..operators.manage_track_handlers import SNA_OT_ManageTrackHandlers
 
 def init_default_selection(self, context):
     if self.default_hol_file:
@@ -9,12 +8,6 @@ def init_default_selection(self, context):
             if file[0] == self.default_hol_file:
                 # Set using the actual enum value instead of string index
                 self.holophonix_hol_files = file[0]
-                
-                # Clear existing track handlers when the default .hol file is selected
-                # Note: We don't call self.clear_track_handlers here because self is FileProperties
-                # and this function is called outside the class context
-                if hasattr(context.scene, 'file_properties'):
-                    context.scene.file_properties.clear_track_handlers(context)
                 break
 
 class FileProperties(bpy.types.PropertyGroup):
@@ -61,23 +54,6 @@ class FileProperties(bpy.types.PropertyGroup):
     def update_selected_hol_file(self, context):
         if self.holophonix_hol_files:
             self.selected_hol_file = os.path.join(self.project_path, self.holophonix_hol_files)
-            
-            # Clear existing track handlers when a new .hol file is selected
-            self.clear_track_handlers(context)
-    
-    def clear_track_handlers(self, context):
-        """Clear existing track handlers when a new .hol file is selected"""
-        # Check if NodeOSC is available
-        if not hasattr(context.scene, 'NodeOSC_keys'):
-            print("NodeOSC is not available, skipping handler cleanup")
-            return
-            
-        # Create an instance of the handler manager
-        handler_manager = SNA_OT_ManageTrackHandlers()
-        
-        # Call the clear_existing_handlers method
-        handler_manager.clear_existing_handlers(context)
-        print(f"Cleared existing track handlers for new .hol file: {self.holophonix_hol_files}")
 
     selected_hol_file: bpy.props.StringProperty(
         name="Selected HOL File",
