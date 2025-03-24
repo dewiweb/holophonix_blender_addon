@@ -1,4 +1,6 @@
 import bpy
+from ..utils.track_handler_proxy import get_manager
+
 
 class SNA_PT_TrackHandlers(bpy.types.Panel):
     """
@@ -20,10 +22,18 @@ class SNA_PT_TrackHandlers(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         settings = context.scene.holophonix_utils.track_handler_settings
+        manager = get_manager()
         
         # Explanation
         box = layout.box()
         box.label(text="OSC Track Handler Settings", icon='NODETREE')
+        
+        # Proxy status
+        if manager:
+            row = box.row()
+            row.label(text=f"Track Proxies: {len(manager.proxies)}", icon='CHECKMARK')
+        else:
+            box.label(text="Proxy Manager not available", icon='ERROR')
         
         # Auto-manage handlers option
         auto_row = box.row()
@@ -59,11 +69,11 @@ class SNA_PT_TrackHandlers(bpy.types.Panel):
         grid.prop(settings, "color_enabled", text="")
         grid.prop(settings, "color_direction", text="")
             
-        # Manual update button (still useful for refreshing)
+        # Manual update button
         row = layout.row()
         row.operator("sna.manage_track_handlers", text="Refresh Track Handlers", icon='FILE_REFRESH')
         
-        # Status info
+        # Track status info
         tracks = [obj for obj in context.scene.objects if "track" in obj.name]
         if tracks:
             layout.label(text=f"Found {len(tracks)} tracks", icon='CHECKMARK')

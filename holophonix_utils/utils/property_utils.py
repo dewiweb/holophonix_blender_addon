@@ -3,6 +3,7 @@ import os
 from bpy.utils import previews
 from ..utils.file_properties import FileProperties
 from ..utils.track_handler_settings import TrackHandlerSettings
+from ..utils.track_handler_proxy import TrackHandlerManager
 
 class HolophonixUtilsProperties(bpy.types.PropertyGroup):
     # Flag to prevent updates during initialization
@@ -13,6 +14,12 @@ class HolophonixUtilsProperties(bpy.types.PropertyGroup):
         name="Holophonix IP Address",
         description="The resolved IP address of holophonix.local",
         default=""
+    )
+
+    # Track handler manager property
+    track_handler_manager: bpy.props.PointerProperty(
+        type=TrackHandlerManager,
+        description="Manager for track handler proxies"
     )
     
     def register_icons(self):
