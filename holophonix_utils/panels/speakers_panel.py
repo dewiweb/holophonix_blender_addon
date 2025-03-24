@@ -38,16 +38,20 @@ class SNA_PT_SPEAKERS_F8536(bpy.types.Panel):
             col = box.column(align=True)
             row = col.row(align=True)
             # Temporarily commented until addon is reloaded
-            # row.operator('sna.select_all_speakers', text='Select All Speakers', icon='RESTRICT_SELECT_OFF')
-            row.label(text="Selection tools will be available after reload")
+            row.operator('sna.select_all_speakers', text='Select All Speakers', icon='RESTRICT_SELECT_OFF')
+            #row.label(text="Selection tools will be available after reload")
         else:
-            # No speakers message and import option
+            # No speakers message
             box = layout.box()
             col = box.column(align=True)
             col.label(text="No Speakers Found", icon='INFO')
             col.label(text="Import speakers from the 'Project Setup' panel")
             col.label(text="or use the button below:")
             col.separator()
-            col.operator('sna.add_speakers_994c8', 
-                       text='Import Speakers', 
-                       icon='IMPORT')
+        
+        # Import speakers option
+        col = layout.column(align=True)
+        col.separator()
+        col.operator('sna.add_speakers_994c8', 
+                   text='Import Speakers from .hol file', 
+                   icon='IMPORT')
