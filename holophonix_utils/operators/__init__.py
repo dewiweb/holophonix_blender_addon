@@ -16,6 +16,7 @@ from .select_all_speakers import SNA_OT_SelectAllSpeakers
 #from .manage_track_handlers import SNA_OT_ManageTrackHandlers
 from .holophonix_communication import SNA_OT_HolophonixCommunication
 from .select_track import SNA_OT_SelectTrack
+from .delete_track import SNA_OT_DeleteTrack
 
 __all__ = [
     "SNA_OT_Load_Venue",
@@ -35,5 +36,6 @@ __all__ = [
     "SNA_OT_ResolveHolophonixHostname",
     #"SNA_OT_ManageTrackHandlers",
     "SNA_OT_HolophonixCommunication",
-    "SNA_OT_SelectTrack"
+    "SNA_OT_SelectTrack",
+    "SNA_OT_DeleteTrack"
 ]

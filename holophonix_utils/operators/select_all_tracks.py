@@ -1,34 +1,37 @@
 import bpy
 
 class SNA_OT_SelectAllTracks(bpy.types.Operator):
-    bl_idname = "sna.select_all_tracks"
-    bl_label = "Select All Tracks"
-    bl_description = "Select all track objects in the scene"
-    bl_options = {"REGISTER", "UNDO"}
+    bl_idname = 'sna.select_all_tracks'
+    bl_label = 'Select All Tracks'
+    bl_description = 'Select/Deselect all track objects in the scene'
+    bl_options = {'REGISTER', 'UNDO'}
     
     @classmethod
     def poll(cls, context):
         # Ensure there's at least one track in the scene
-        return any(obj for obj in context.scene.objects if "track" in obj.name)
+        return any(obj for obj in context.scene.objects if 'track' in obj.name)
     
     def execute(self, context):
-        # Deselect all first
-        bpy.ops.object.select_all(action='DESELECT')
-        
-        # Find and select all track objects
-        tracks = [obj for obj in context.scene.objects if "track" in obj.name]
+        tracks = [obj for obj in context.scene.objects if 'track' in obj.name]
         
         if not tracks:
-            self.report({'INFO'}, "No tracks found in the scene")
+            self.report({'INFO'}, 'No tracks found in the scene')
             return {'CANCELLED'}
         
-        # Select all track objects
-        for obj in tracks:
-            obj.select_set(True)
+        # Check if all tracks are already selected
+        all_selected = all(obj.select_get() for obj in tracks)
         
-        # Set the active object to the first track
-        if tracks:
+        if all_selected:
+            # Deselect all tracks
+            for obj in tracks:
+                obj.select_set(False)
+            context.view_layer.objects.active = None
+            self.report({'INFO'}, f'Deselected {len(tracks)} track objects')
+        else:
+            # Select all tracks
+            for obj in tracks:
+                obj.select_set(True)
             context.view_layer.objects.active = tracks[0]
-            
-        self.report({'INFO'}, f"Selected {len(tracks)} track objects")
+            self.report({'INFO'}, f'Selected {len(tracks)} track objects')
+        
         return {'FINISHED'}

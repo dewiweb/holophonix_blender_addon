@@ -36,14 +36,13 @@ from .utils.file_properties import FileProperties
 from .panels import *
 from .operators import *
 
-
 classes = [
     # Properties
     #'HandlerProperties',
     #'TrackHandlerSettings',           # New simplified track handler settings
     HolophonixUtilsProperties,
     # Other property classes
-    HandlerProperties,
+    #'HandlerProperties,
     FileProperties,
     IconUtils,
     # Panels
@@ -73,7 +72,8 @@ classes = [
     SNA_OT_SelectAllSpeakers,
     SNA_OT_ResolveHolophonixHostname,
     SNA_OT_HolophonixCommunication,
-    SNA_OT_SelectTrack
+    SNA_OT_SelectTrack,
+    SNA_OT_DeleteTrack,
 ]
 
 def register():

@@ -5,7 +5,7 @@ import json
 import numpy
 from math import radians
 from ..utils.math_utils import cart2sph, sph2cart
-from ..utils.track_handler_proxy import get_manager
+#from ..utils.track_handler_proxy import get_manager
 
 class SNA_OT_Add_Tracks_73B0D(bpy.types.Operator, ImportHelper):
     bl_idname = "sna.add_tracks_73b0d"
@@ -36,21 +36,21 @@ class SNA_OT_Add_Tracks_73B0D(bpy.types.Operator, ImportHelper):
         # Create color handler
         self._create_color_handler(context, track)
         
-        # Initialize proxy if manager is available
-        manager = get_manager()
-        if manager:
-            # Get or create proxy using track name as key
-            track_key = f"track.{track.name}"
-            proxy = manager.get_proxy(track_key)
-            if proxy:
-                # Update proxy settings
-                proxy.set_attr("position_enabled", settings.position_enabled)
-                proxy.set_attr("position_direction", settings.position_direction)
-                proxy.set_attr("name_enabled", settings.name_enabled)
-                proxy.set_attr("name_direction", settings.name_direction)
-                proxy.set_attr("color_enabled", settings.color_enabled)
-                proxy.set_attr("color_direction", settings.color_direction)
-        
+        ## Initialize proxy if manager is available
+        #manager = get_manager()
+        #if manager:
+        #    # Get or create proxy using track name as key
+        #    track_key = f"track.{track.name}"
+        #    proxy = manager.get_proxy(track_key)
+        #    if proxy:
+        #        # Update proxy settings
+        #        proxy.set_attr("position_enabled", settings.position_enabled)
+        #        proxy.set_attr("position_direction", settings.position_direction)
+        #        proxy.set_attr("name_enabled", settings.name_enabled)
+        #        proxy.set_attr("name_direction", settings.name_direction)
+        #        proxy.set_attr("color_enabled", settings.color_enabled)
+        #        proxy.set_attr("color_direction", settings.color_direction)
+        #
         return True
     
     def _create_position_handler(self, context, obj, index, axis):
@@ -188,19 +188,19 @@ class SNA_OT_Add_Tracks_73B0D(bpy.types.Operator, ImportHelper):
                         bpy.context.scene.NodeOSC_keys.remove(index)
                         print(f"Removed NodeOSC_key for track {obj.name}")
             
-            # Clean up related proxies in TrackHandlerManager
-            manager = get_manager()
-            if manager:
-                # Try different proxy key formats
-                proxy_keys = [
-                    f"track.{obj.name}",  # Main format
-                    obj.name,              # Alternative format
-                    f"{obj.name}"          # String format
-                ]
-                
-                for proxy_key in proxy_keys:
-                    if manager.remove_proxy(proxy_key):
-                        print(f"Removed proxy for track {obj.name} with key {proxy_key}")
+            ## Clean up related proxies in TrackHandlerManager
+            #manager = get_manager()
+            #if manager:
+            #    # Try different proxy key formats
+            #    proxy_keys = [
+            #        f"track.{obj.name}",  # Main format
+            #        obj.name,              # Alternative format
+            #        f"{obj.name}"          # String format
+            #    ]
+            #    
+            #    for proxy_key in proxy_keys:
+            #        if manager.remove_proxy(proxy_key):
+            #            print(f"Removed proxy for track {obj.name} with key {proxy_key}")
             
             # Delete the track object
             bpy.data.objects.remove(obj, do_unlink=True)
