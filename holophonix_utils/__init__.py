@@ -28,8 +28,8 @@ import bpy
 import os
 from .utils import (
     HolophonixUtilsProperties,
-    HandlerProperties,
-    TrackHandlerSettings,
+    #'HandlerProperties',
+    #TrackHandlerSettings,
     IconUtils
 )
 from .utils.file_properties import FileProperties
@@ -38,8 +38,8 @@ from .operators import *
 
 classes = [
     # Properties
-    HandlerProperties,
-    TrackHandlerSettings,           # New simplified track handler settings
+    #'HandlerProperties',
+    #'TrackHandlerSettings',           # New simplified track handler settings
     HolophonixUtilsProperties,
     FileProperties,
     IconUtils,
@@ -52,7 +52,7 @@ classes = [
     SNA_PT_SPEAKERS_F8536,
     SNA_PT_AN_SETTINGS_E1993,
     SNA_PT_Import_Holophonix_Project,
-    SNA_PT_TrackHandlers,           # New track handlers panel
+    #SNA_PT_TrackHandlers,           # New track handlers panel
     # Operators
     SNA_OT_Delete_Handlers_C2D71,
     SNA_OT_Add_Tracks_73B0D,
@@ -61,7 +61,7 @@ classes = [
     SNA_OT_Add_Speakers_994C8,
     SNA_OT_Add_Handlers,
     SNA_OT_ExportAndCreateHandlers,
-    SNA_OT_ManageTrackHandlers,     # New track handlers operator
+    #'SNA_OT_ManageTrackHandlers',     # New track handlers operator
     SNA_OT_Import_Holophonix_Project,
     SNA_OT_Load_Venue,
     SNA_OT_Import_Tracks,
@@ -70,7 +70,8 @@ classes = [
     SNA_OT_SelectAllTracks,
     SNA_OT_SelectAllSpeakers,
     SNA_OT_ResolveHolophonixHostname,
-    SNA_OT_HolophonixCommunication
+    SNA_OT_HolophonixCommunication,
+    SNA_OT_SelectTrack
 ]
 
 def register():

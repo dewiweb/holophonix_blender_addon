@@ -6,7 +6,7 @@ from .holophonix_communication_panel import SNA_PT_HolophonixNodeOSC
 from .speakers_panel import SNA_PT_SPEAKERS_F8536
 from .an_settings_panel import SNA_PT_AN_SETTINGS_E1993
 from .import_project_panel import SNA_PT_Import_Holophonix_Project
-from .track_handlers_panel import SNA_PT_TrackHandlers
+#from .track_handlers_panel import SNA_PT_TrackHandlers
 
 __all__ = [
     "SNA_PT_Import_Holophonix_Project",
@@ -17,5 +17,5 @@ __all__ = [
     "SNA_PT_HolophonixNodeOSC",
     "SNA_PT_SPEAKERS_F8536",
     "SNA_PT_AN_SETTINGS_E1993",
-    "SNA_PT_TrackHandlers"
+    #"SNA_PT_TrackHandlers"
 ]

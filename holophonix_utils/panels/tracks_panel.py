@@ -1,6 +1,7 @@
 import bpy
 import traceback
 
+
 class SNA_PT_TRACKS_11FF6(bpy.types.Panel):
     bl_label = 'Tracks'
     bl_idname = 'SNA_PT_TRACKS_11FF6'
@@ -43,8 +44,29 @@ class SNA_PT_TRACKS_11FF6(bpy.types.Panel):
             
             # Stats about tracks
             row = box.row()
-            row.label(text=f"Tracks: {len(tracks)}", icon='MESH_ICOSPHERE') 
-            
+            row.label(text=f"Tracks: {len(tracks)}", icon='MESH_ICOSPHERE')
+
+            # Track table
+            table = box.column(align=True)
+            table.label(text="Track List", icon='OUTLINER_DATA_GP_LAYER')
+
+            # Add headers
+            header_row = table.row()
+            header_row.label(text="No. - Track Name", icon='LINENUMBERS_ON')
+
+            # Add rows for each track
+            for track in tracks:
+                # Extract track number and name from obj.name
+                parts = track.name.split('.')
+                if len(parts) >= 3 and parts[0] == "track":
+                    track_number = parts[1]
+                    track_name = '.'.join(parts[2:])  # Handle cases where NAME contains dots
+                    row = table.row()
+                    
+                    # Make the entire row clickable
+                    row.operator("sna.select_track", text=track_number+" - "+track_name, emboss=True).track_name = track.name
+                    
+        
             # Track actions
             col = box.column(align=True)
             
