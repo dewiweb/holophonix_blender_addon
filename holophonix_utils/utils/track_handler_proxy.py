@@ -199,6 +199,10 @@ def setup():
     from ..properties import HolophonixUtilsProperties
     if not hasattr(HolophonixUtilsProperties, 'track_handler_manager'):
         HolophonixUtilsProperties.track_handler_manager = bpy.props.PointerProperty(type=TrackHandlerManager)
+    
+    # Register handler
+    if on_nodeosc_update not in bpy.app.handlers.depsgraph_update_post:
+        bpy.app.handlers.depsgraph_update_post.append(on_nodeosc_update)
 
 # Cleanup function to be called during unregistration
 def cleanup():

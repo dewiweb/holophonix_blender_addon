@@ -79,10 +79,6 @@ def register():
     from bpy.utils import register_class, previews
     import os
 
-    # Register AttributeValue first
-    from .utils.track_handler_proxy import AttributeValue
-    register_class(AttributeValue)
-
     # Load custom icon
     icon_path = os.path.join(os.path.dirname(__file__), 'icons', 'logo_icon.png')
     custom_icons = previews.new()
@@ -91,8 +87,7 @@ def register():
 
     # Register all classes
     for cls in classes:
-        if cls != AttributeValue:  # Skip AttributeValue since we already registered it
-            bpy.utils.register_class(cls)
+        bpy.utils.register_class(cls)
 
     # Add custom property to the scene
     bpy.types.Scene.holophonix_utils = bpy.props.PointerProperty(type=HolophonixUtilsProperties)
