@@ -36,16 +36,18 @@ from .utils.file_properties import FileProperties
 from .panels import *
 from .operators import *
 
+
 classes = [
     # Properties
     #'HandlerProperties',
     #'TrackHandlerSettings',           # New simplified track handler settings
     HolophonixUtilsProperties,
+    # Other property classes
+    HandlerProperties,
     FileProperties,
     IconUtils,
     # Panels
     SNA_PT_MAIN_PANEL,
-    # SNA_PT_NodeOSC_Operations,  # Functionality moved to SNA_PT_HolophonixNodeOSC
     SNA_PT_SPECIALHANDLERS,
     SNA_PT_TRACKS_11FF6,
     SNA_PT_HolophonixNodeOSC,
@@ -118,11 +120,14 @@ def register():
     # Icon registration is now handled by the timer
     
     # Add handler to initialize track handlers properties
-    from .utils import initialize_track_handlers
+    from .utils import initialize_track_handlers, setup_track_handler_proxy
     # First remove any existing copy of the handler to avoid duplicates
     if initialize_track_handlers in bpy.app.handlers.depsgraph_update_post:
         bpy.app.handlers.depsgraph_update_post.remove(initialize_track_handlers)
     bpy.app.handlers.depsgraph_update_post.append(initialize_track_handlers)
+    
+    # Setup track handler proxy system
+    setup_track_handler_proxy()
     
     # Clear initializing flag after registration
     def clear_initializing_flag():
@@ -136,9 +141,12 @@ def register():
 
 def unregister():
     # Clean up app handlers
-    from .utils import initialize_track_handlers
+    from .utils import initialize_track_handlers, cleanup_track_handler_proxy
     if initialize_track_handlers in bpy.app.handlers.depsgraph_update_post:
         bpy.app.handlers.depsgraph_update_post.remove(initialize_track_handlers)
+        
+    # Clean up track handler proxy system
+    cleanup_track_handler_proxy()
         
     # Unregister icons for all scenes
     for scene in bpy.data.scenes:

@@ -5,6 +5,7 @@ import json
 import numpy
 from math import radians
 from ..utils.math_utils import cart2sph, sph2cart
+from ..utils.track_handler_proxy import get_manager
 
 class SNA_OT_Add_Tracks_73B0D(bpy.types.Operator, ImportHelper):
     bl_idname = "sna.add_tracks_73b0d"
@@ -22,6 +23,123 @@ class SNA_OT_Add_Tracks_73B0D(bpy.types.Operator, ImportHelper):
     def poll(cls, context):
         return not False
 
+    def _create_handlers_for_track(self, context, track, settings):
+        """Create handlers for a track and initialize proxy"""
+        # Create position handlers (x, y, z)
+        axes = ['x', 'y', 'z']
+        for i, axis in enumerate(axes):
+            self._create_position_handler(context, track, i, axis)
+        
+        # Create name handler
+        self._create_name_handler(context, track)
+        
+        # Create color handler
+        self._create_color_handler(context, track)
+        
+        # Initialize proxy if manager is available
+        manager = get_manager()
+        if manager:
+            # Get or create proxy using track name as key
+            track_key = f"track.{track.name}"
+            proxy = manager.get_proxy(track_key)
+            if proxy:
+                # Update proxy settings
+                proxy.set_attr("position_enabled", settings.position_enabled)
+                proxy.set_attr("position_direction", settings.position_direction)
+                proxy.set_attr("name_enabled", settings.name_enabled)
+                proxy.set_attr("name_direction", settings.name_direction)
+                proxy.set_attr("color_enabled", settings.color_enabled)
+                proxy.set_attr("color_direction", settings.color_direction)
+        
+        return True
+    
+    def _create_position_handler(self, context, obj, index, axis):
+        """Create position handler for a track"""
+        # Extract track ID from object name
+        parts = obj.name.split('.')
+        if len(parts) < 2:
+            return
+        
+        track_id = parts[1]
+        
+        # Check if handler already exists
+        osc_address = f"/track/{track_id}/{axis}"
+        if any(key.osc_address == osc_address for key in context.scene.NodeOSC_keys):
+            return
+        
+        item = context.scene.NodeOSC_keys.add()
+        item.name = f"track.{obj.name}.{axis}"
+        item.osc_address = osc_address
+        item.data_path = f"bpy.data.objects['{obj.name}'].matrix_world.translation[{index}]"
+        item.osc_type = "f"
+        item.osc_index = "()"
+        item.osc_direction = "OUTPUT"
+        item.filter_repetition = False
+        item.dp_format_enable = False
+        item.dp_format = "args"
+        item.loop_enable = False
+        item.loop_range = "0, length, 1"
+        item.enabled = True
+        item.ui_expanded = False
+    
+    def _create_name_handler(self, context, obj):
+        """Create name handler for a track"""
+        # Extract track ID from object name
+        parts = obj.name.split('.')
+        if len(parts) < 2:
+            return
+        
+        track_id = parts[1]
+        
+        # Check if handler already exists
+        osc_address = f"/track/{track_id}/name"
+        if any(key.osc_address == osc_address for key in context.scene.NodeOSC_keys):
+            return
+        
+        item = context.scene.NodeOSC_keys.add()
+        item.name = f"track.{obj.name}.name"
+        item.osc_address = osc_address
+        item.data_path = f"bpy.data.objects['{obj.name}'].name"
+        item.osc_type = "s"
+        item.osc_index = "(0)"
+        item.osc_direction = "INPUT"
+        item.filter_repetition = False
+        item.dp_format_enable = False
+        item.dp_format = "args"
+        item.loop_enable = False
+        item.loop_range = "0, length, 1"
+        item.enabled = True
+        item.ui_expanded = False
+    
+    def _create_color_handler(self, context, obj):
+        """Create color handler for a track"""
+        # Extract track ID from object name
+        parts = obj.name.split('.')
+        if len(parts) < 2:
+            return
+        
+        track_id = parts[1]
+        
+        # Check if handler already exists
+        osc_address = f"/track/{track_id}/color"
+        if any(key.osc_address == osc_address for key in context.scene.NodeOSC_keys):
+            return
+        
+        item = context.scene.NodeOSC_keys.add()
+        item.name = f"track.{obj.name}.color"
+        item.osc_address = osc_address
+        item.data_path = f"bpy.data.objects['{obj.name}'].color"
+        item.osc_type = "f"
+        item.osc_index = "(0,1,2,3)"
+        item.osc_direction = "INPUT"
+        item.filter_repetition = False
+        item.dp_format_enable = False
+        item.dp_format = "args"
+        item.loop_enable = False
+        item.loop_range = "0, length, 1"
+        item.enabled = True
+        item.ui_expanded = False
+    
     def execute(self, context):
         preset_file_path = self.filepath
         file_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'amadeus.blend')
@@ -57,6 +175,7 @@ class SNA_OT_Add_Tracks_73B0D(bpy.types.Operator, ImportHelper):
         # Delete track objects directly
         for obj in tracks_to_delete:
             print(f"Deleting track object: {obj.name}")
+            
             # Clean up related NodeOSC_keys
             if hasattr(bpy.context.scene, 'NodeOSC_keys'):
                 keys_to_remove = [
@@ -68,6 +187,20 @@ class SNA_OT_Add_Tracks_73B0D(bpy.types.Operator, ImportHelper):
                     if index >= 0:
                         bpy.context.scene.NodeOSC_keys.remove(index)
                         print(f"Removed NodeOSC_key for track {obj.name}")
+            
+            # Clean up related proxies in TrackHandlerManager
+            manager = get_manager()
+            if manager:
+                # Try different proxy key formats
+                proxy_keys = [
+                    f"track.{obj.name}",  # Main format
+                    obj.name,              # Alternative format
+                    f"{obj.name}"          # String format
+                ]
+                
+                for proxy_key in proxy_keys:
+                    if manager.remove_proxy(proxy_key):
+                        print(f"Removed proxy for track {obj.name} with key {proxy_key}")
             
             # Delete the track object
             bpy.data.objects.remove(obj, do_unlink=True)
