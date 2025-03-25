@@ -130,6 +130,16 @@ class HolophonixUtilsProperties(bpy.types.PropertyGroup):
         description="Enable/disable the populate handler",
         default=True
     )
+
+    show_track_table: bpy.props.BoolProperty(
+        name="Show Track Table",
+        default=True
+    )
+
+    show_introduction: bpy.props.BoolProperty(
+        name="Show Introduction",
+        default=True
+    )
     '''
     project_path: bpy.props.StringProperty(
         name="Project Path",
@@ -333,3 +343,4 @@ def property_exists(prop_path, glob, loc):
         return False
 
 # Registration moved to __init__.py
+

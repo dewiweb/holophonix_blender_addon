@@ -39,41 +39,45 @@ class SNA_PT_TRACKS_11FF6(bpy.types.Panel):
         
         # Track management section
         if tracks:
+            # Track table (collapsable)
             box = layout.box()
-            box.label(text="Track Management", icon='OUTLINER_OB_GROUP_INSTANCE')
-            
-            # Stats about tracks
-            row = box.row()
-            row.label(text=f"Tracks: {len(tracks)}", icon='MESH_ICOSPHERE')
+            col = box.column(align=True)
+            row = col.row(align=True)
+            row.prop(context.scene.holophonix_utils, "show_track_table", text="Track List", icon='TRIA_DOWN' if context.scene.holophonix_utils.show_track_table else 'TRIA_RIGHT', emboss=False)
+            row.label(text=f"({len(tracks)} tracks)", icon='MESH_ICOSPHERE')
 
-            # Track table
-            table = box.column(align=True)
-            table.label(text="Track List", icon='OUTLINER_DATA_GP_LAYER')
+            if context.scene.holophonix_utils.show_track_table:
+                table = col.column(align=True)
+                # Add headers
+                header_row = table.row()
+                header_row.label(text="No. - Track Name", icon='LINENUMBERS_ON')
 
-            # Add headers
-            header_row = table.row()
-            header_row.label(text="No. - Track Name", icon='LINENUMBERS_ON')
-
-            # Add rows for each track
-            for track in tracks:
-                # Extract track number and name from obj.name
-                parts = track.name.split('.')
-                if len(parts) >= 3 and parts[0] == "track":
-                    track_number = parts[1]
-                    track_name = '.'.join(parts[2:])  # Handle cases where NAME contains dots
-                    row = table.row()
-                    
-                    # Make the entire row clickable
-                    row.operator("sna.select_track", text=track_number+" - "+track_name, emboss=True).track_name = track.name
-                    
+                # Add rows for each track
+                for track in tracks:
+                    # Extract track number and name from obj.name
+                    parts = track.name.split('.')
+                    if len(parts) >= 3 and parts[0] == "track":
+                        track_number = parts[1]
+                        track_name = '.'.join(parts[2:])  # Handle cases where NAME contains dots
+                        row = table.row()
+                        
+                        # Make the entire row clickable with toggle state
+                        is_selected = track in context.selected_objects
+                        op = row.operator("sna.select_track", text=track_number+" - "+track_name, emboss=True, icon='CHECKBOX_HLT' if is_selected else 'CHECKBOX_DEHLT')
+                        op.track_name = track.name
+                        
+                        # Add delete button
+                        del_op = row.operator("sna.delete_track", text="", icon='TRASH')
+                        del_op.track_name = track.name
         
             # Track actions
             col = box.column(align=True)
             
-            # Track selection controls
+            # All Tracks selection controls
             row = col.row(align=True)
             row.scale_y = 1.2
-            row.operator('sna.select_all_tracks', text='Select All Tracks', icon='RESTRICT_SELECT_OFF')
+            all_selected = len(context.selected_objects) == len(tracks)
+            row.operator('sna.select_all_tracks', text='Select All Tracks' if not all_selected else 'Deselect All Tracks', icon='RESTRICT_SELECT_OFF' if not all_selected else 'RESTRICT_SELECT_ON')
         else:
             # No tracks message
             box = layout.box()
