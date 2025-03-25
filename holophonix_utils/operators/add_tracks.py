@@ -214,4 +214,7 @@ class SNA_OT_Add_Tracks_73B0D(bpy.types.Operator, ImportHelper):
                         
                         # Apply the color to the material
                         bpy.data.materials[trk.name+'.mat'].diffuse_color = trk_color
+
+        #create tracks handlers
+        bpy.ops.sna.export_create_handlers()
         return {"FINISHED"}

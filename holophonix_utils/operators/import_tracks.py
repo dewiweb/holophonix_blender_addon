@@ -184,4 +184,8 @@ class SNA_OT_Import_Tracks(bpy.types.Operator):
                             bpy.data.materials[trk.name+'.mat'].diffuse_color = trk_color
 
         self.report({'INFO'}, 'Tracks imported successfully!')
+        
+        #create tracks handlers
+        bpy.ops.sna.export_create_handlers()
+        
         return {'FINISHED'}
