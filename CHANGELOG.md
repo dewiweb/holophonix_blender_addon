@@ -1,5 +1,24 @@
 # Changelog
 
+## v1.3.2 - 2025-03-26
+
+### Added
+- Implemented spherical to Cartesian conversion with drivers.
+- Added NodeOSC_keys cleanup when deleting tracks.
+
+### Fixed
+- Resolved merge conflicts and cleaned up track handler references.
+- Fixed math domain errors in AED properties and drivers.
+- Ensured values are within valid ranges in AED properties.
+
+### Changed
+- Updated AED properties and drivers for improved property definitions.
+- Removed deprecated track handlers panel and updated related operators.
+- Improved track handler management: clear handlers when selecting `.hol` files or importing tracks directly.
+
+### Documentation
+- Documented handler cleanup improvements and future track-handler lifecycle management tasks.
+
 ## v1.3.1-beta (Upcoming Release)
 
 > Note: This release builds upon v1.3.0-beta with additional track handler management improvements
