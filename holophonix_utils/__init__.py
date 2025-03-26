@@ -74,6 +74,7 @@ classes = [
     SNA_OT_HolophonixCommunication,
     SNA_OT_SelectTrack,
     SNA_OT_DeleteTrack,
+    SNA_OT_Add_AED_Properties
 ]
 
 def register():

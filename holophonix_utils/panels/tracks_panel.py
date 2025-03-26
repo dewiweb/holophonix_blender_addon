@@ -94,6 +94,14 @@ class SNA_PT_TRACKS_11FF6(bpy.types.Panel):
             box.label(text="NodeOSC addon is required for track handlers", icon='ERROR')
             col = box.column()
             col.label(text="Please install and enable the NodeOSC addon")
+
+        # Add a note about AED properties requirement for track handlers
+        if not hasattr(context.scene, 'azim'):
+            box = layout.box()
+            box.label(text="AED properties are required for track handlers", icon='ERROR')
+            col = box.column()
+            col.label(text="Please add AED properties using the 'Add Custom Properties' button")
+            col.operator('sna.add_aed_properties', text='Add Custom Properties', icon='PLUS')
         
         # Note: Legacy global handler controls removed as they are no longer necessary
         # Individual handlers can now be controlled separately
