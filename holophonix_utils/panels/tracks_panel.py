@@ -101,7 +101,7 @@ class SNA_PT_TRACKS_11FF6(bpy.types.Panel):
             box.label(text="AED properties are required for track handlers", icon='ERROR')
             col = box.column()
             col.label(text="Please add AED properties using the 'Add Custom Properties' button")
-            col.operator('sna.add_aed_properties', text='Add Custom Properties', icon='PLUS')
+            col.operator('sna.add_aed_properties', text='Add AED Properties', icon='PLUS')
         
         # Note: Legacy global handler controls removed as they are no longer necessary
         # Individual handlers can now be controlled separately
