@@ -182,3 +182,8 @@ class SNA_OT_Add_AED_Properties(Operator):
                     driver.expression = 'dist * sin(elev)'
 
         driver.type = 'SCRIPTED'
+        # After setting the driver's expression
+        if target_prop.startswith('matrix_world.translation'):
+            index = int(target_prop[-2])
+            fcurve = obj.driver_add('location', index)
+            fcurve.mute = True
