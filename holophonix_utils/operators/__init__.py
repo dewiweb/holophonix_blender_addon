@@ -18,6 +18,12 @@ from .holophonix_communication import SNA_OT_HolophonixCommunication
 from .select_track import SNA_OT_SelectTrack
 from .delete_track import SNA_OT_DeleteTrack
 from .add_aed_properties import SNA_OT_Add_AED_Properties
+from .toggle_coord_sys_drivers import SNA_OT_Toggle_Coord_Sys_Drivers
+from .toggle_track_handlers import SNA_OT_ToggleTrackHandlers
+from .delete_all_tracks import SNA_OT_DeleteAllTracks
+from .update_handler_directions import SNA_OT_UpdateHandlerDirections
+from .update_handler_directions import SNA_OT_UpdatePositionDirections
+from .bulk_handler_management import SNA_OT_DisableAllHandlers,SNA_OT_EnableAllHandlers,SNA_OT_ToggleAllHandlers,SNA_OT_SetAllDirections
 
 __all__ = [
     "SNA_OT_Load_Venue",
@@ -39,5 +45,14 @@ __all__ = [
     "SNA_OT_HolophonixCommunication",
     "SNA_OT_SelectTrack",
     "SNA_OT_DeleteTrack",
-    "SNA_OT_Add_AED_Properties"
+    "SNA_OT_Add_AED_Properties",
+    "SNA_OT_ToggleTrackHandlers",
+    "SNA_OT_Toggle_Coord_Sys_Drivers",
+    "SNA_OT_DeleteAllTracks",
+    "SNA_OT_UpdateHandlerDirections",
+    "SNA_OT_UpdatePositionDirections",
+    "SNA_OT_DisableAllHandlers",
+    "SNA_OT_EnableAllHandlers",
+    "SNA_OT_ToggleAllHandlers",
+    "SNA_OT_SetAllDirections"
 ]
