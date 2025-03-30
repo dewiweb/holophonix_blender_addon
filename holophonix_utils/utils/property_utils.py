@@ -342,5 +342,45 @@ def property_exists(prop_path, glob, loc):
     except:
         return False
 
+
+def update_location_direction(self, context):
+    if hasattr(context.scene, 'NodeOSC_keys'):
+        handlers = [
+            key for key in context.scene.NodeOSC_keys 
+            if any(axis in key.osc_address for axis in ['x', 'y', 'z'])
+            and self.id_data.name in key.data_path
+        ]
+        for handler in handlers:
+            handler.osc_direction = self.location_direction
+
+class TrackProperties(bpy.types.PropertyGroup):
+    location_direction: bpy.props.EnumProperty(
+        name="",
+        items=[
+            ('INPUT', "Input", "Receive data", 'IMPORT', 0),
+            ('OUTPUT', "Output", "Send data", 'EXPORT', 1), 
+            ('BOTH', "Both", "Send and receive", 'FILE_REFRESH', 2)
+        ],
+        update=update_location_direction
+    )
+
+class SceneProperties(bpy.types.PropertyGroup):
+    all_handlers_enabled: bpy.props.BoolProperty(
+        name="All Handlers Enabled",
+        description="Toggle all track handlers",
+        default=True,
+        update=lambda self, context: bpy.ops.sna.toggle_all_handlers()
+    )
+
+    all_directions: bpy.props.EnumProperty(
+        name="All Directions",
+        items=[
+            ('INPUT', "Input", "Receive data", 'IMPORT', 0),
+            ('OUTPUT', "Output", "Send data", 'EXPORT', 1), 
+            ('BOTH', "Both", "Send and receive", 'FILE_REFRESH', 2)
+        ],
+        update=lambda self, context: bpy.ops.sna.set_all_directions(direction=self.all_directions)
+    )
+    
 # Registration moved to __init__.py
 
