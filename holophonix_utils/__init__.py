@@ -28,6 +28,8 @@ import bpy
 import os
 from .utils import (
     HolophonixUtilsProperties,
+    TrackProperties,
+    SceneProperties,
     #'HandlerProperties',
     #TrackHandlerSettings,
     IconUtils
@@ -41,6 +43,8 @@ classes = [
     #'HandlerProperties',
     #'TrackHandlerSettings',           # New simplified track handler settings
     HolophonixUtilsProperties,
+    TrackProperties,
+    SceneProperties,
     # Other property classes
     #'HandlerProperties,
     FileProperties,
@@ -55,6 +59,7 @@ classes = [
     SNA_PT_Import_Holophonix_Project,
     #SNA_PT_TrackHandlers,           # New track handlers panel
     # Operators
+    SNA_OT_DeleteAllTracks,
     SNA_OT_Delete_Handlers_C2D71,
     SNA_OT_Add_Tracks_73B0D,
     SNA_OT_Import_An_Tree_433Db,
@@ -74,7 +79,15 @@ classes = [
     SNA_OT_HolophonixCommunication,
     SNA_OT_SelectTrack,
     SNA_OT_DeleteTrack,
-    SNA_OT_Add_AED_Properties
+    SNA_OT_Add_AED_Properties,
+    SNA_OT_Toggle_Coord_Sys_Drivers,
+    SNA_OT_ToggleTrackHandlers,
+    SNA_OT_UpdateHandlerDirections,
+    SNA_OT_UpdatePositionDirections,
+    SNA_OT_EnableAllHandlers,
+    SNA_OT_DisableAllHandlers,
+    SNA_OT_ToggleAllHandlers,
+    SNA_OT_SetAllDirections
 ]
 
 def register():
@@ -94,17 +107,20 @@ def register():
     # Add custom property to the scene
     bpy.types.Scene.holophonix_utils = bpy.props.PointerProperty(type=HolophonixUtilsProperties)
     bpy.types.Scene.file_properties = bpy.props.PointerProperty(type=FileProperties)
-    
-    # Set initializing flag to prevent updates during registration
-    # Use a safer approach that doesn't rely on bpy.context.scene which may not be available during registration
-    def set_initializing_flag():
-        for scene in bpy.data.scenes:
-            if hasattr(scene, 'holophonix_utils'):
-                scene.holophonix_utils.is_initializing = True
-        return None
-    
-    # Defer setting the flag until the next frame when the scene should be available
-    bpy.app.timers.register(set_initializing_flag, first_interval=0.1)
+    # Create location_direction property
+    bpy.types.Object.track_props = bpy.props.PointerProperty(type=TrackProperties)
+    bpy.types.Scene.holophonix_scene_props = bpy.props.PointerProperty(type=SceneProperties)
+
+    ### Set initializing flag to prevent updates during registration
+    ### Use a safer approach that doesn't rely on bpy.context.scene which may not be available during registration
+    ##def set_initializing_flag():
+    ##    for scene in bpy.data.scenes:
+    ##        if hasattr(scene, 'holophonix_utils'):
+    ##            scene.holophonix_utils.is_initializing = True
+    ##    return None
+    ##
+    ### Defer setting the flag until the next frame when the scene should be available
+    ##bpy.app.timers.register(set_initializing_flag, first_interval=0.1)
 
     # Defer icon registration until the scene is available
     def deferred_icon_registration():
@@ -120,34 +136,34 @@ def register():
 
     # Icon registration is now handled by the timer
     
-    # Add handler to initialize track handlers properties
-    from .utils import initialize_track_handlers, setup_track_handler_proxy
-    # First remove any existing copy of the handler to avoid duplicates
-    if initialize_track_handlers in bpy.app.handlers.depsgraph_update_post:
-        bpy.app.handlers.depsgraph_update_post.remove(initialize_track_handlers)
-    bpy.app.handlers.depsgraph_update_post.append(initialize_track_handlers)
-    
-    # Setup track handler proxy system
-    setup_track_handler_proxy()
-    
-    # Clear initializing flag after registration
-    def clear_initializing_flag():
-        for scene in bpy.data.scenes:
-            if hasattr(scene, 'holophonix_utils'):
-                scene.holophonix_utils.is_initializing = False
-        return None
-    
-    # Defer clearing the flag until the next frame when the scene should be available
-    bpy.app.timers.register(clear_initializing_flag, first_interval=0.2)
+    ### Add handler to initialize track handlers properties
+    ##from .utils import initialize_track_handlers, setup_track_handler_proxy
+    ### First remove any existing copy of the handler to avoid duplicates
+    ##if initialize_track_handlers in bpy.app.handlers.depsgraph_update_post:
+    ##    bpy.app.handlers.depsgraph_update_post.remove(initialize_track_handlers)
+    ##bpy.app.handlers.depsgraph_update_post.append(initialize_track_handlers)
+    ##
+    ### Setup track handler proxy system
+    ##setup_track_handler_proxy()
+    ##
+    ### Clear initializing flag after registration
+    ##def clear_initializing_flag():
+    ##    for scene in bpy.data.scenes:
+    ##        if hasattr(scene, 'holophonix_utils'):
+    ##            scene.holophonix_utils.is_initializing = False
+    ##    return None
+    ##
+    ### Defer clearing the flag until the next frame when the scene should be available
+    ##bpy.app.timers.register(clear_initializing_flag, first_interval=0.2)
 
 def unregister():
-    # Clean up app handlers
-    from .utils import initialize_track_handlers, cleanup_track_handler_proxy
-    if initialize_track_handlers in bpy.app.handlers.depsgraph_update_post:
-        bpy.app.handlers.depsgraph_update_post.remove(initialize_track_handlers)
-        
-    # Clean up track handler proxy system
-    cleanup_track_handler_proxy()
+    ### Clean up app handlers
+    ##from .utils import initialize_track_handlers, cleanup_track_handler_proxy
+    ##if initialize_track_handlers in bpy.app.handlers.depsgraph_update_post:
+    ##    bpy.app.handlers.depsgraph_update_post.remove(initialize_track_handlers)
+    ##    
+    ### Clean up track handler proxy system
+    ##cleanup_track_handler_proxy()
         
     # Unregister icons for all scenes
     for scene in bpy.data.scenes:
@@ -156,6 +172,12 @@ def unregister():
                 scene.holophonix_utils.unregister_icons()
             except Exception as e:
                 print(f"Error unregistering icons: {e}")
+
+    del bpy.types.Scene.holophonix_scene_props
+
+    # Remove location_direction property
+    del bpy.types.Object.track_props
+
 
     # Remove custom property from the scene
     del bpy.types.Scene.holophonix_utils

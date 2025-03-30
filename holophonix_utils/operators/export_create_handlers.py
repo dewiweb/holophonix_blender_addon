@@ -24,6 +24,8 @@ class SNA_OT_ExportAndCreateHandlers(bpy.types.Operator):
                 self.create_track_handler(context, obj, id, "y", 1)
                 self.create_track_handler(context, obj, id, "z", 2)
                 
+                obj.track_props.location_direction = 'OUTPUT'
+
                 # Create track color handler
                 self.create_color_handler(context, obj, id)
                 
