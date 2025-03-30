@@ -21,6 +21,7 @@ class SNA_OT_Add_AED_Properties(Operator):
     def poll(cls, context):
         return context.object is not None
 
+
     def execute(self, context):
         obj = context.object
         location = obj.matrix_world.translation
@@ -34,7 +35,8 @@ class SNA_OT_Add_AED_Properties(Operator):
         obj.azim = azimuth
         obj.elev = elevation
         obj.dist = distance
-        obj['aed'] = [azimuth, elevation, distance]
+        #obj['aed'] = [azimuth, elevation, distance]
+        obj['use_cartesian'] = True
 
         # Create drivers for bidirectional conversion
         self._create_driver(obj, 'matrix_world.translation', 'azim')
@@ -50,9 +52,13 @@ class SNA_OT_Add_AED_Properties(Operator):
     def _create_driver(self, obj, source_prop, target_prop):
         # Create driver for target property
         if target_prop.startswith('matrix_world.translation'):
-            driver = obj.driver_add('location', int(target_prop[-2])).driver
+            fcurve = obj.driver_add('location', int(target_prop[-2]))
+            driver = fcurve.driver
+            fcurve.mute = not obj.get('use_cartesian', True)  # Mute if not using Cartesian
         else:
-            driver = obj.driver_add(target_prop).driver
+            fcurve = obj.driver_add(target_prop)
+            driver = fcurve.driver
+            fcurve.mute = obj.get('use_cartesian', True)  # Mute if using Cartesian
 
         if source_prop == 'matrix_world.translation':
             # Driving spherical coordinates from translation
@@ -81,9 +87,9 @@ class SNA_OT_Add_AED_Properties(Operator):
             if target_prop == 'azim':
                 driver.expression = 'atan2(y,x)'
             elif target_prop == 'elev':
-                driver.expression = 'asin(z/sqrt(x*x+y*y+z*z))'
+                driver.expression = 'asin(z/sqrt(x*x+y*y+z*z)) if x*x+y*y+z*z != 0 else 0'
             elif target_prop == 'dist':
-                driver.expression = 'sqrt(x*x+y*y+z*z)'
+                driver.expression = 'sqrt(x*x+y*y+z*z) if x*x+y*y+z*z != 0 else 0'
 
         else:
             # Driving translation from spherical coordinates
@@ -182,8 +188,3 @@ class SNA_OT_Add_AED_Properties(Operator):
                     driver.expression = 'dist * sin(elev)'
 
         driver.type = 'SCRIPTED'
-        # After setting the driver's expression
-        if target_prop.startswith('matrix_world.translation'):
-            index = int(target_prop[-2])
-            fcurve = obj.driver_add('location', index)
-            fcurve.mute = True
