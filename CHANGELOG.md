@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.3.3-beta - 2025-03-30
+
+### Added
+- Global "Auto-Manage Handlers" toggle in Track Handlers panel
+
+### Changed
+- Improved track handler management system to respect individual handler customizations
+- Enhanced track handlers panel UI to always show direction settings
+- Optimized track handler management using enabled attribute
+
+### Fixed
+- Direction update issue for disabled track handlers
+- Updated initialization and export files
+
 ## v1.3.2 - 2025-03-26
 
 ### Added

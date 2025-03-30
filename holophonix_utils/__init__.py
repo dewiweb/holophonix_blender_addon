@@ -16,7 +16,7 @@ bl_info = {
     "author" : "Dewiweb",
     "description" : "",
     "blender" : (4, 3, 0),
-    "version" : (1, 3, 2),
+    "version" : (1, 3, 3, "beta"),
     "location" : "",
     "warning" : "",
     "doc_url": "",
