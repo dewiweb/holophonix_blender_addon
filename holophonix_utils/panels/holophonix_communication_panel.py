@@ -36,6 +36,14 @@ class SNA_PT_HolophonixNodeOSC(bpy.types.Panel):
         row = status_box.row()
         row.label(text=f"NodeOSC output port: {context.scene.nodeosc_envars.port_out} (Should be 4003)")
         
+        # Set port button
+        port_row = status_box.row()
+        port_op = port_row.operator("sna.holophonix_communication", 
+                              text="Set Port to 4003", 
+                              icon='CHECKMARK' if context.scene.nodeosc_envars.port_out == 4003 else 'ERROR')
+        port_op.set_port_only = True
+        port_op.apply_ip_only = False
+        
         # Current NodeOSC UDP out settings
         row = status_box.row()
         row.label(text=f"NodeOSC UDP output: {context.scene.nodeosc_envars.udp_out}")
@@ -54,19 +62,20 @@ class SNA_PT_HolophonixNodeOSC(bpy.types.Panel):
         else:
             # Show unresolved status
             row.label(text=f"{hostname_text} → Not resolved", icon='ERROR')
+            row = status_box.row()
             row.operator('sna.resolve_holophonix_hostname', text='Retry Resolution')
         
         # Configuration section
         config_box = box.box()
-        config_box.label(text="Configure Connection:", icon='MODIFIER')
+        #config_box.label(text="Configure Connection:", icon='MODIFIER')
         
-        # Port configuration button
-        port_row = config_box.row()
-        port_op = port_row.operator("sna.holophonix_communication", 
-                              text="Set Port to 4003", 
-                              icon='CHECKMARK' if context.scene.nodeosc_envars.port_out == 4003 else 'ERROR')
-        port_op.set_port_only = True
-        port_op.apply_ip_only = False
+        ### Port configuration button
+        ##port_row = config_box.row()
+        ##port_op = port_row.operator("sna.holophonix_communication", 
+        ##                      text="Set Port to 4003", 
+        ##                      icon='CHECKMARK' if context.scene.nodeosc_envars.port_out == 4003 else 'ERROR')
+        ##port_op.set_port_only = True
+        ##port_op.apply_ip_only = False
         
         # If holophonix_ip is stored in scene props, show the UI to apply it
         if hasattr(context.scene, 'holophonix_utils') and hasattr(context.scene.holophonix_utils, 'holophonix_ip'):

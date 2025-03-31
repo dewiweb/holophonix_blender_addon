@@ -61,7 +61,13 @@ class SNA_PT_Import_Holophonix_Project(bpy.types.Panel):
         # Load Venue button (enabled when .zip is imported)
         row = layout.row()
         row.enabled = utils_props.project_imported
-        row.operator('sna.load_venue', text='Load Venue')
+        if 'io_scene_gltf2' not in bpy.context.preferences.addons:
+            row = layout.row()
+            row.label(text="Error: glTF 2.0 format addon is not enabled.", icon='ERROR')
+            row = layout.row()
+            row.label(text="Please enable it in preferences to import Venue.")
+        else:
+            row.operator('sna.load_venue', text='Load Venue')
         
         # Dropdown for .hol files (enabled when .zip is imported and project_path is set)
         row = layout.row()

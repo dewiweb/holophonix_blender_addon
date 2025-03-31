@@ -13,7 +13,6 @@ from .select_hol_file import SNA_OT_Select_Hol_File
 from .holophonix_communication import SNA_OT_ResolveHolophonixHostname
 from .select_all_tracks import SNA_OT_SelectAllTracks
 from .select_all_speakers import SNA_OT_SelectAllSpeakers
-#from .manage_track_handlers import SNA_OT_ManageTrackHandlers
 from .holophonix_communication import SNA_OT_HolophonixCommunication
 from .select_track import SNA_OT_SelectTrack
 from .delete_track import SNA_OT_DeleteTrack
@@ -23,7 +22,7 @@ from .toggle_track_handlers import SNA_OT_ToggleTrackHandlers
 from .delete_all_tracks import SNA_OT_DeleteAllTracks
 from .update_handler_directions import SNA_OT_UpdateHandlerDirections
 from .update_handler_directions import SNA_OT_UpdatePositionDirections
-from .bulk_handler_management import SNA_OT_DisableAllHandlers,SNA_OT_EnableAllHandlers,SNA_OT_ToggleAllHandlers,SNA_OT_SetAllDirections
+from .bulk_handler_management import SNA_OT_DisableAllHandlers,SNA_OT_EnableAllHandlers,SNA_OT_ToggleAllHandlers,SNA_OT_SetAllDirections,SNA_OT_ToggleLocationHandlers,SNA_OT_SetLocationDirections,SNA_OT_ToggleColorHandlers,SNA_OT_SetColorDirections,SNA_OT_ToggleNameHandlers,SNA_OT_SetNameDirections
 
 __all__ = [
     "SNA_OT_Load_Venue",
@@ -41,7 +40,6 @@ __all__ = [
     "SNA_OT_SelectAllTracks",
     "SNA_OT_SelectAllSpeakers",
     "SNA_OT_ResolveHolophonixHostname",
-    #"SNA_OT_ManageTrackHandlers",
     "SNA_OT_HolophonixCommunication",
     "SNA_OT_SelectTrack",
     "SNA_OT_DeleteTrack",
@@ -54,5 +52,11 @@ __all__ = [
     "SNA_OT_DisableAllHandlers",
     "SNA_OT_EnableAllHandlers",
     "SNA_OT_ToggleAllHandlers",
-    "SNA_OT_SetAllDirections"
+    "SNA_OT_SetAllDirections",
+    "SNA_OT_ToggleLocationHandlers",
+    "SNA_OT_SetLocationDirections",
+    "SNA_OT_ToggleColorHandlers",
+    "SNA_OT_SetColorDirections",
+    "SNA_OT_ToggleNameHandlers",
+    "SNA_OT_SetNameDirections"
 ]
