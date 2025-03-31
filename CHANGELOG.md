@@ -1,5 +1,38 @@
 # Changelog
 
+## v1.3.4 - 2025-03-31
+
+### Added
+- New handler operators for toggling and setting directions:
+  - ToggleLocationHandlers
+  - SetLocationDirections
+  - ToggleColorHandlers
+  - SetColorDirections
+  - ToggleNameHandlers
+  - SetNameDirections
+- Auto-Manage Handlers toggle for better control over track handlers
+- Persistent handler configurations using enabled attribute
+
+### Changed
+- Improved icon management system
+  - Added deferred icon registration
+  - Better error handling
+  - Proper cleanup during unregister
+- Updated addon metadata with better descriptions and URLs
+- Improved UI organization with sub-panels and better hierarchy
+- Simplified track handler management system
+
+### Removed
+- Unused track handler code:
+  - track_handler_settings.py
+  - track_handler_proxy.py
+  - handler_properties.py
+  - manage_track_handlers.py
+
+### Fixed
+- Infinite update loop in track handler management
+- Direction settings for disabled handlers
+
 ## v1.3.3-beta - 2025-03-30
 
 ### Added

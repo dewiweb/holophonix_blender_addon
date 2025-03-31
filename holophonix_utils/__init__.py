@@ -16,7 +16,7 @@ bl_info = {
     "author" : "Dewiweb",
     "description" : "Tools for managing Holophonix tracks, speakers, and OSC communication in Blender",
     "blender" : (4, 3, 0),
-    "version" : (1, 3, 3),
+    "version" : (1, 3, 4),
     "location" : "3D View > Sidebar > Holophonix",
     "warning" : "",
     "doc_url": "https://github.com/dewiweb/holophonix_blender_addon",
