@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.3.4 - 2025-03-31
+## v1.3.4-beta - 2025-03-31
 
 ### Added
 - New handler operators for toggling and setting directions:
