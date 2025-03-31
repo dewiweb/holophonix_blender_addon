@@ -30,6 +30,8 @@ class SNA_OT_ResolveHolophonixHostname(bpy.types.Operator):
         
     def _resolve_hostname_thread(self, context, hostname):
         """Background thread function to resolve hostname"""
+        # Wait 10 seconds before first attempt
+        time.sleep(10)
         try:
             # Try to resolve the hostname
             ip_address = socket.gethostbyname(hostname)

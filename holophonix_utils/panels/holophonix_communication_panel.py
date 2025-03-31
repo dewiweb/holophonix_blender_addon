@@ -54,6 +54,7 @@ class SNA_PT_HolophonixNodeOSC(bpy.types.Panel):
         else:
             # Show unresolved status
             row.label(text=f"{hostname_text} → Not resolved", icon='ERROR')
+            row.operator('sna.resolve_holophonix_hostname', text='Retry Resolution')
         
         # Configuration section
         config_box = box.box()
