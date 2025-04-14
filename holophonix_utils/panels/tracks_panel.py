@@ -126,27 +126,54 @@ class SNA_PT_TRACKS_11FF6(bpy.types.Panel):
             
             # All Tracks selection controls
             row = col.row(align=True)
-            #row.scale_y = 1.2
             all_selected = len(context.selected_objects) == len(tracks)
             row.operator('sna.select_all_tracks', text='Select All Tracks' if not all_selected else 'Deselect All Tracks', icon='RESTRICT_SELECT_OFF' if not all_selected else 'RESTRICT_SELECT_ON')
             row.operator('sna.delete_all_tracks', text='', icon='TRASH')
 
             # Bulk handler controls
-            #row = col.row(align=True)
-            #row.operator('sna.enable_all_handlers', text='Enable All')
-            #row.operator('sna.disable_all_handlers', text='Disable All')
+            # Only show handler controls if NodeOSC addon is enabled
+            if 'NodeOSC' in bpy.context.preferences.addons and hasattr(context.scene, 'NodeOSC_keys'):
+                row.prop(context.scene.holophonix_scene_props, 'all_handlers_enabled', 
+                    text="", 
+                    icon='CHECKBOX_HLT' if context.scene.holophonix_scene_props.all_handlers_enabled else 'CHECKBOX_DEHLT')
+            
+            
+                # Global Track Settings
+                row = col.row()
+                row.label(text="Global OSC's tracks Settings", icon='SETTINGS')
+                
+                # Type-specific handler controls
+                split = col.split(factor=0.3)
+                col1 = split.column()
+                col2 = split.column()
+                
+                # Location handlers
+                row = col1.row(align=True)
+                row.label(text="X,Y,Z:")
+                row = col2.row(align=True)
+                row.prop(context.scene.holophonix_scene_props, 'location_handlers_direction', text="")
+                row.prop(context.scene.holophonix_scene_props, 'location_handlers_enabled', text="")
 
-            #row = col.row(align=True)
-            #row = col.row(align=True)
-            row.prop(context.scene.holophonix_scene_props, 'all_handlers_enabled', 
-                text="", 
-                icon='CHECKBOX_HLT' if context.scene.holophonix_scene_props.all_handlers_enabled else 'CHECKBOX_DEHLT')
-
-            # Direction controls
-            row = col.row(align=True)
-            row.label(text="All Directions:")
-            row.prop(context.scene.holophonix_scene_props, 'all_directions', text="")
-
+                # Color handlers
+                row = col1.row(align=True)
+                row.label(text="Color:")
+                row = col2.row(align=True)
+                row.prop(context.scene.holophonix_scene_props, 'color_handlers_direction', text="")
+                row.prop(context.scene.holophonix_scene_props, 'color_handlers_enabled', text="")
+                
+                # Name handlers
+                row = col1.row(align=True)
+                row.label(text="Name:")
+                row = col2.row(align=True)
+                row.prop(context.scene.holophonix_scene_props, 'name_handlers_direction', text="")
+                row.prop(context.scene.holophonix_scene_props, 'name_handlers_enabled', text="")
+            
+            
+            ### All directions control
+            ##row = col.row(align=True)
+            ##row.label(text="All Directions:")
+            ##row.prop(context.scene.holophonix_scene_props, 'all_directions', text="")
+        
         else:
             # No tracks message
             box = layout.box()

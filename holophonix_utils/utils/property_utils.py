@@ -369,7 +369,7 @@ class SceneProperties(bpy.types.PropertyGroup):
         name="All Handlers Enabled",
         description="Toggle all track handlers",
         default=True,
-        update=lambda self, context: bpy.ops.sna.toggle_all_handlers()
+        update=lambda self, context: (bpy.ops.sna.toggle_all_handlers(), None)[1]
     )
 
     all_directions: bpy.props.EnumProperty(
@@ -379,8 +379,58 @@ class SceneProperties(bpy.types.PropertyGroup):
             ('OUTPUT', "Output", "Send data", 'EXPORT', 1), 
             ('BOTH', "Both", "Send and receive", 'FILE_REFRESH', 2)
         ],
-        update=lambda self, context: bpy.ops.sna.set_all_directions(direction=self.all_directions)
+        update=lambda self, context: (bpy.ops.sna.set_all_directions(direction=self.all_directions), None)[1]
+    )
+    
+    location_handlers_enabled: bpy.props.BoolProperty(
+        name="Location Handlers Enabled",
+        description="Toggle location track handlers",
+        default=True,
+        update=lambda self, context: (bpy.ops.sna.toggle_location_handlers(), None)[1]
+    )
+    
+    location_handlers_direction: bpy.props.EnumProperty(
+        name="Location Handlers Direction",
+        items=[
+            ('INPUT', "Input", "Receive data", 'IMPORT', 0),
+            ('OUTPUT', "Output", "Send data", 'EXPORT', 1), 
+            ('BOTH', "Both", "Send and receive", 'FILE_REFRESH', 2)
+        ],
+        update=lambda self, context: (bpy.ops.sna.set_location_directions(direction=self.location_handlers_direction), None)[1]
+    )
+    
+    color_handlers_enabled: bpy.props.BoolProperty(
+        name="Color Handlers Enabled",
+        description="Toggle color track handlers",
+        default=True,
+        update=lambda self, context: (bpy.ops.sna.toggle_color_handlers(), None)[1]
+    )
+    
+    color_handlers_direction: bpy.props.EnumProperty(
+        name="Color Handlers Direction",
+        items=[
+            ('INPUT', "Input", "Receive data", 'IMPORT', 0),
+            ('OUTPUT', "Output", "Send data", 'EXPORT', 1), 
+            ('BOTH', "Both", "Send and receive", 'FILE_REFRESH', 2)
+        ],
+        update=lambda self, context: (bpy.ops.sna.set_color_directions(direction=self.color_handlers_direction), None)[1]
+    )
+    
+    name_handlers_enabled: bpy.props.BoolProperty(
+        name="Name Handlers Enabled",
+        description="Toggle name track handlers",
+        default=True,
+        update=lambda self, context: (bpy.ops.sna.toggle_name_handlers(), None)[1]
+    )
+    
+    name_handlers_direction: bpy.props.EnumProperty(
+        name="Name Handlers Direction",
+        items=[
+            ('INPUT', "Input", "Receive data", 'IMPORT', 0),
+            ('OUTPUT', "Output", "Send data", 'EXPORT', 1), 
+            ('BOTH', "Both", "Send and receive", 'FILE_REFRESH', 2)
+        ],
+        update=lambda self, context: (bpy.ops.sna.set_name_directions(direction=self.name_handlers_direction), None)[1]
     )
     
 # Registration moved to __init__.py
-
