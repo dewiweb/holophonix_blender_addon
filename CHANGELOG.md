@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.4.0 - 2025-04-14
+
+### Added
+- Added animated GIF demonstrating how to open a Holophonix project in README
+
+### Changed
+- Bumped version to 1.4.0 for stable release
+
 ## v1.3.4-beta - 2025-03-31
 
 ### Added
