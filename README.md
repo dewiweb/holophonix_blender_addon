@@ -151,6 +151,8 @@ The addon works with NodeOSC to:
    - The system will automatically attempt to resolve 'holophonix.local'
    - Set the correct port (4003) and apply resolved IP address
 
+![Opening a Holophonix project](open_project.gif)
+
 ### Practical Examples
 
 **Live Performance Setup**:
